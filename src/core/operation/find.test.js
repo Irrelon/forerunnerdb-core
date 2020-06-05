@@ -59,14 +59,36 @@ describe("find()", () => {
 			const query = {
 				"arr": {
 					"goof": true,
-					"fun": true
+					"fun": false
 				}
 			};
 
 			const result = find(data, query);
 
 			assert.strictEqual(result.length, 1, "Number of results is correct");
+			assert.strictEqual(result[0]._id, 2, "ID is correct");
+		});
+		
+		it("Matches based on gated sub-documents", () => {
+			const query = {
+				$or: [{
+					"arr": {
+						"goof": true,
+						"fun": false
+					}
+				}, {
+					"arr": {
+						"goof": true,
+						"fun": true
+					}
+				}]
+			};
+			
+			const result = find(data, query);
+			
+			assert.strictEqual(result.length, 2, "Number of results is correct");
 			assert.strictEqual(result[0]._id, 1, "ID is correct");
+			assert.strictEqual(result[1]._id, 2, "ID is correct");
 		});
 	});
 	
