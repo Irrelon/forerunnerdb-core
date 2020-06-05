@@ -1,6 +1,6 @@
 import { extendedType } from "../../utils/type";
 import { gates } from "./match";
-import {flattenValues} from "@irrelon/path";
+import {flattenValues, join as pathJoin} from "@irrelon/path";
 
 export const queryFromObject = (obj) => {
 	return flattenValues(obj, undefined, "", {
@@ -121,7 +121,7 @@ export const queryToPipeline = (query, currentGate = "", parentPath = "") => {
 		if (!valTypeData.isFlat) {
 			// Wrap this in an $and
 			if (currentGate !== "$and") {
-				return $and(path, objectToArray(value));
+				return $and(pathJoin(parentPath, path), objectToArray(value));
 			} else {
 				// Merge our current data with the parent data
 				return objectToArray(value).map((item) => queryToPipeline(item, currentGate, path));
@@ -130,7 +130,7 @@ export const queryToPipeline = (query, currentGate = "", parentPath = "") => {
 
 		// The path is not an operation, the value is not recursive so
 		// we have an implicit $eeq
-		return $eeq(path, value, extendedType(value));
+		return $eeq(pathJoin(parentPath, path), value, extendedType(value));
 	})[0];
 };
 

@@ -54,6 +54,20 @@ describe("find()", () => {
 			assert.strictEqual(result.length, 1, "Number of results is correct");
 			assert.strictEqual(result[0]._id, 2, "ID is correct");
 		});
+
+		it("Matches based on sub-documents", () => {
+			const query = {
+				"arr": {
+					"goof": true,
+					"fun": true
+				}
+			};
+
+			const result = find(data, query);
+
+			assert.strictEqual(result.length, 1, "Number of results is correct");
+			assert.strictEqual(result[0]._id, 1, "ID is correct");
+		});
 	});
 	
 	describe("Boolean, Date", () => {
