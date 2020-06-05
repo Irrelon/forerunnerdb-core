@@ -134,8 +134,8 @@ export const $in = (data, query, {originalQuery, operation} = {originalQuery: un
 		return false;
 	}
 };
-// Not in
-export const $nin = (data, query, {originalQuery, operation}) => {
+
+export const $nin = (data, query, {originalQuery, operation} = {originalQuery: undefined, operation: undefined}) => {
 	// Check that the in query is an array
 	if (Array.isArray(query)) {
 		let inArr = query,
@@ -155,12 +155,22 @@ export const $nin = (data, query, {originalQuery, operation}) => {
 	}
 };
 
-export const $fastIn = (data, query, {originalQuery, operation}) => {
+export const $fastIn = (data, query, {originalQuery, operation} = {originalQuery: undefined, operation: undefined}) => {
 	if (query instanceof Array) {
 		// Data is a string or number, use indexOf to identify match in array
 		return query.indexOf(data) !== -1;
 	} else {
-		console.log('Cannot use a $fastIn operator on a non-array key: ' + operation.path, originalQuery);
+		console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
+		return false;
+	}
+};
+
+export const $fastNin = (data, query, {originalQuery, operation} = {originalQuery: undefined, operation: undefined}) => {
+	if (query instanceof Array) {
+		// Data is a string or number, use indexOf to identify match in array
+		return query.indexOf(data) === -1;
+	} else {
+		console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
 		return false;
 	}
 };
@@ -244,5 +254,7 @@ export const operationLookup = {
 	$and,
 	$or,
 	$in,
-	$fastIn
+	$nin,
+	$fastIn,
+	$fastNin
 };
