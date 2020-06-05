@@ -1,6 +1,7 @@
 # ForerunnerDB Core
-This project contains the core query/match/update functionality
-that is a standalone engine and can be used for any purpose.
+This project contains the core query/match/update functionality of
+ForerunnerDB 3.x and is a standalone engine and can be used for
+any purpose in any project.
 
 >forerunnerdb-core provides the core of ForerunnerDB 3.0 which
 >is a complete rewrite of ForerunnerDB in ES6 instead of ES5 and
