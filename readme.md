@@ -21,4 +21,4 @@ optimise for this first.
 Right now, this project is still in development but is usable.
 Because of this, there is no documentation. You can check out
 the unit tests to see how to use various parts of the core
-engine.
+engine. JSDoc comments are also mostly missing at this point.
