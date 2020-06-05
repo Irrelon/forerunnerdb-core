@@ -52,7 +52,7 @@
 	"dependencies": {
 		"@babel/runtime": "^7.9.2",
 		"@irrelon/emitter": "^3.0.0",
-		"@irrelon/path": "4.6.2",
+		"@irrelon/path": "^4.6.4",
 		"irrelon-log": "^2.0.3"
 	},
 	"devDependencies": {

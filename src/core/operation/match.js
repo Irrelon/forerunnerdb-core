@@ -25,7 +25,7 @@ export const $and = (dataItem, opArr, extraInfo = {originalQuery: {}}) => {
 			return operationLookup[opData.op](dataItem, opData.value, extraInfo);
 		}
 		
-		dataValue = pathGet(dataItem, opData.path);
+		dataValue = pathGet(dataItem, opData.path, undefined, {arrayTraversal: true});
 		opFunc = operationLookup[opData.op];
 		opValue = opData.value;
 		
@@ -54,7 +54,7 @@ export const $or = (dataItem, opArr, extraInfo = {originalQuery: {}}) => {
 			return operationLookup[opData.op](dataItem, opData.value, extraInfo);
 		}
 		
-		dataValue = pathGet(dataItem, opData.path);
+		dataValue = pathGet(dataItem, opData.path, undefined, {arrayTraversal: true});
 		opFunc = operationLookup[opData.op];
 		opValue = opData.value;
 		
