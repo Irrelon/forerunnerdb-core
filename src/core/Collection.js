@@ -256,8 +256,9 @@ class Collection extends CoreClass {
 	update (queryObj, updateObj, options) {
 		const resultArr = update(this._data, queryObj, updateObj, options);
 		
-		// TODO: Now loop the result array and remove from index and re-index each item that
-		//  has been updated
+		// TODO: Now loop the result array and check if any fields that are in the
+		//  update object match fields that are in the index. If they are, remove each
+		//  document from the index and re-index them
 		return resultArr;
 	}
 	
