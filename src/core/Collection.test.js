@@ -4,7 +4,7 @@ import OperationSuccess from "../operations/OperationSuccess";
 import OperationFailure from "../operations/OperationFailure";
 
 describe("Collection", () => {
-	/*describe("operation()", () => {
+	describe("operation()", () => {
 		describe("Positive Path", () => {
 			it("Can run an operation and provide the correct result", () => {
 				const coll = new Collection();
@@ -36,13 +36,14 @@ describe("Collection", () => {
 				coll.insert({
 					"_id": "1"
 				});
+				
 				const result = coll.operation({
 					"_id": "1"
 				}, coll.indexViolationCheck);
 				
 				assert.strictEqual(result.success.length, 0, "Correct");
 				assert.strictEqual(result.failure.length, 1, "Correct");
-				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_PREFLIGHT_VIOLATION, "Correct");
+				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Correct");
 			});
 			
 			it("Can run multiple operations and provide the correct result", () => {
@@ -58,7 +59,7 @@ describe("Collection", () => {
 				
 				assert.strictEqual(result.success.length, 1, "Correct");
 				assert.strictEqual(result.failure.length, 1, "Correct");
-				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_PREFLIGHT_VIOLATION, "Correct");
+				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Correct");
 				assert.strictEqual(result.success[0].type, OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS, "Correct");
 			});
 		});
@@ -103,10 +104,13 @@ describe("Collection", () => {
 				{_id: 30, item: "lamp", qty: 20, type: "floor"},
 				{_id: 32, item: "bulk", qty: 100}
 			], {ordered: true});
-			console.log("Result", result);
+			
+			// The below number should be 1 because we are inserting ordered so on the
+			// second insert (which will fail) the operation should stop
 			assert.strictEqual(result.nInserted, 1, "Number of inserted documents is correct");
-			assert.strictEqual(result.writeError.code, 1, "Error code is correct");
-			assert.strictEqual(result.writeError.errmsg, "Index violation", "Error msg is correct");
+			assert.strictEqual(result.nFailed, 1, "Number of failed documents is correct");
+			assert.strictEqual(result.stage.postflight.failure.length, 1, "Number of failed documents is correct");
+			assert.strictEqual(result.stage.postflight.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Error code is correct");
 		});
 		
 		it("Can insert an array of data unordered and fail correctly", async () => {
@@ -114,14 +118,16 @@ describe("Collection", () => {
 			const result = await coll.insert([
 				{_id: 40, item: "lamp", qty: 50, type: "desk"},
 				{_id: 40, item: "lamp", qty: 20, type: "floor"},
-				{_id: 42, item: "bulk", qty: 100}
+				{_id: 42, item: "bulk", qty: 100},
+				{_id: 40, item: "lamp", qty: 20, type: "floor"},
 			], {ordered: false});
-			console.log("Result", result);
+			
 			assert.strictEqual(result.nInserted, 2, "Number of inserted documents is correct");
-			assert.strictEqual(result.writeError.code, 1, "Error code is correct");
-			assert.strictEqual(result.writeError.errmsg, "Index violation", "Error msg is correct");
+			assert.strictEqual(result.nFailed, 2, "Number of failed documents is correct");
+			assert.strictEqual(result.stage.postflight.failure.length, 2, "Number of failed documents is correct");
+			assert.strictEqual(result.stage.postflight.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Error code is correct");
 		});
-	});*/
+	});
 	
 	describe("update()", () => {
 	

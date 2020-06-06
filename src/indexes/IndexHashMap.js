@@ -34,13 +34,17 @@ class IndexHashMap extends CoreClass {
 		return this._data[hash] && this._data[hash].length > 0;
 	}
 	
+	isUnique () {
+		return this._options.unique === true;
+	}
+	
 	willViolate (doc) {
 		const hash = this.hash(doc);
 		return this.willViolateByHash(hash);
 	}
 	
 	willViolateByHash (hash) {
-		return this._options.unique && this.exists(hash);
+		return this.isUnique() && this.exists(hash);
 	}
 	
 	insert (doc) {
@@ -71,6 +75,15 @@ class IndexHashMap extends CoreClass {
 		if (index === -1) return;
 		
 		this._data[hash].splice(index, 1);
+	}
+	
+	/**
+	 * Creates a new index of the same type with the same setup
+	 * as this index, but with no data.
+	 * @returns {IndexHashMap}
+	 */
+	replicate () {
+		return new IndexHashMap(this._keys, this._options);
 	}
 }
 

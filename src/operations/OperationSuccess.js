@@ -3,7 +3,8 @@ import CoreClass from "../core/CoreClass";
 class OperationSuccess extends CoreClass {
 	static constants = {
 		"UNDEFINED_SUCCESS": "UNDEFINED_SUCCESS",
-		"INDEX_PREFLIGHT_SUCCESS": "INDEX_PREFLIGHT_SUCCESS"
+		"INDEX_PREFLIGHT_SUCCESS": "INDEX_PREFLIGHT_SUCCESS",
+		"INSERT_SUCCESS": "INSERT_SUCCESS"
 	};
 	
 	constructor (data = {"type": OperationSuccess.constants.UNDEFINED_SUCCESS, meta: {}}) {
