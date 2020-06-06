@@ -232,7 +232,7 @@ class Collection extends CoreClass {
 		// if we are over the threshold
 		if (this._cap && this._data.length > this._cap) {
 			// Remove the first item in the data array
-			this.removeById(this._data[0][this._primaryKey]);
+			this.removeById(pathGet(this._data[0], this._primaryKey));
 		}
 		
 		// 5 Return result
