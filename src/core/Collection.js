@@ -254,7 +254,11 @@ class Collection extends CoreClass {
 	}
 	
 	update (queryObj, updateObj, options) {
-		return update(this._data, queryObj, updateObj, options);
+		const resultArr = update(this._data, queryObj, updateObj, options);
+		
+		// TODO: Now loop the result array and remove from index and re-index each item that
+		//  has been updated
+		return resultArr;
 	}
 	
 	updateOne (queryObj, update, options) {
