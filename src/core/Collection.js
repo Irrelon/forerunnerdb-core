@@ -1,4 +1,4 @@
-import {setImmutable} from "@irrelon/path";
+import {setImmutable as pathSetImmutable, get as pathGet} from "@irrelon/path";
 import CoreClass from "./CoreClass";
 import objectId from "../utils/objectId";
 import IndexHashMap from "../indexes/IndexHashMap";
@@ -27,9 +27,9 @@ class Collection extends CoreClass {
 	 * @private
 	 */
 	ensurePrimaryKey = function (obj) {
-		if (obj[this._primaryKey] === undefined) {
+		if (pathGet(obj, this._primaryKey) === undefined) {
 			// Assign a primary key automatically
-			return setImmutable(obj, this._primaryKey, objectId());
+			return pathSetImmutable(obj, this._primaryKey, objectId());
 		}
 		
 		return obj;
