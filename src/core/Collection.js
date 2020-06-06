@@ -5,6 +5,8 @@ import IndexHashMap from "../indexes/IndexHashMap";
 import OperationResult from "../operations/OperationResult";
 import OperationFailure from "../operations/OperationFailure";
 import OperationSuccess from "../operations/OperationSuccess";
+import find from "./operation/find";
+import update from "./operation/update";
 
 class Collection extends CoreClass {
 	constructor (name) {
@@ -239,8 +241,46 @@ class Collection extends CoreClass {
 		return insertResult;
 	}
 	
-	removeById (id) {
+	find (queryObj = {}, options = {}) {
+		return find(this._data, queryObj);
+	}
 	
+	findOne (queryObj, options) {
+		return this.find(queryObj, options)[0];
+	}
+	
+	findMany (queryObj, options) {
+		return this.find(queryObj, options);
+	}
+	
+	update (queryObj, updateObj, options) {
+		return update(this._data, queryObj, updateObj, options);
+	}
+	
+	updateOne (queryObj, update, options) {
+		return this.update(queryObj, update, {...options, "$one": true});
+	}
+	
+	updateMany (queryObj, update, options) {
+		return this.update(queryObj, update, options);
+	}
+	
+	remove (queryObj = {}, options = {}) {
+	
+	}
+	
+	removeOne (queryObj, options) {
+		return this.remove(queryObj, {...options, "$one": true})
+	}
+	
+	removeMany (queryObj, options) {
+		return this.remove(queryObj, options);
+	}
+	
+	removeById (id) {
+		return this.removeOne({
+			[this._primaryKey]: id
+		});
 	}
 }
 

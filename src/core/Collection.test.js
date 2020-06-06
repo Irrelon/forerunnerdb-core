@@ -97,7 +97,7 @@ describe("Collection", () => {
 			assert.strictEqual(result.nInserted, 3, "Number of inserted documents is correct");
 		});
 		
-		it("Can insert an array of data and fail correctly", async () => {
+		it("Can insert an array of data ordered and fail correctly", async () => {
 			const coll = new Collection();
 			const result = await coll.insert([
 				{_id: 30, item: "lamp", qty: 50, type: "desk"},
@@ -130,7 +130,30 @@ describe("Collection", () => {
 	});
 	
 	describe("update()", () => {
-	
+		it("Can update a single data object", async () => {
+			const coll = new Collection();
+			const insertResult = await coll.insert([{
+				"_id": "1",
+				"foo": true
+			}, {
+				"_id": "2",
+				"foo": true
+			}]);
+			
+			const findResult1 = await coll.find();
+			
+			const updateResult = await coll.updateOne({
+				"_id": "1"
+			}, {
+				"_id": "1",
+				"foo": false,
+				"newVal": "bar"
+			});
+			
+			assert.strictEqual(insertResult.nInserted, 2, "Number of inserted documents is correct");
+			assert.strictEqual(findResult1.length, 2, "Number of documents is correct");
+			assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+		});
 	});
 	
 	describe("remove()", () => {
