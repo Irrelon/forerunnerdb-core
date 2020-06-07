@@ -145,14 +145,26 @@ describe("Collection", () => {
 			const updateResult = await coll.updateOne({
 				"_id": "1"
 			}, {
-				"_id": "1",
 				"foo": false,
 				"newVal": "bar"
 			});
 			
+			const findResult2 = await coll.find();
+			
 			assert.strictEqual(insertResult.nInserted, 2, "Number of inserted documents is correct");
 			assert.strictEqual(findResult1.length, 2, "Number of documents is correct");
 			assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+			assert.strictEqual(findResult2.length, 2, "Number of documents is correct");
+			assert.strictEqual(findResult2[0]._id, "1", "Number of documents is correct");
+			assert.strictEqual(findResult2[0].foo, false, "Correct value");
+			assert.deepStrictEqual(findResult2, [{
+				"_id": "1",
+				"foo": false,
+				"newVal": "bar"
+			}, {
+				"_id": "2",
+				"foo": true
+			}], "Correct value");
 		});
 	});
 	

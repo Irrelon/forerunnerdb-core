@@ -254,6 +254,8 @@ class Collection extends CoreClass {
 	}
 	
 	update (queryObj, updateObj, options) {
+		// TODO: Add option to run a sanity check on each match before and update
+		//  is performed so we can check if an index violation would occur
 		const resultArr = update(this._data, queryObj, updateObj, options);
 		
 		// TODO: Now loop the result array and check if any fields that are in the
