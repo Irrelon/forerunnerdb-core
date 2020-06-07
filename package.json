@@ -2,7 +2,7 @@
 	"author": "Rob Evans - Irrelon Software Limited",
 	"name": "@irrelon/forerunnerdb-core",
 	"description": "ForerunnerDB core utilities for operating on JSON data.",
-	"version": "3.0.1",
+	"version": "3.0.2",
 	"private": false,
 	"keywords": [
 		"irrelon",
@@ -45,7 +45,7 @@
 		"type": "git",
 		"url": "git://github.com/irrelon/fdb-core.git"
 	},
-	"main": "./src/main.js",
+	"main": "./dist/main.js",
 	"bugs": {
 		"url": "http://github.com/irrelon/fdb-core/issues"
 	},
