@@ -1,8 +1,9 @@
 {
 	"author": "Rob Evans - Irrelon Software Limited",
-	"name": "fdb-core",
+	"name": "@irrelon/forerunnerdb-core",
 	"description": "ForerunnerDB core utilities for operating on JSON data.",
-	"version": "2.0.0",
+	"version": "3.0.0",
+	"private": false,
 	"keywords": [
 		"irrelon",
 		"forerunnerdb",
