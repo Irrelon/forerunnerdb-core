@@ -2,7 +2,7 @@
 	"author": "Rob Evans - Irrelon Software Limited",
 	"name": "@irrelon/forerunnerdb-core",
 	"description": "ForerunnerDB core utilities for operating on JSON data.",
-	"version": "3.0.0",
+	"version": "3.0.1",
 	"private": false,
 	"keywords": [
 		"irrelon",
@@ -38,14 +38,14 @@
 	},
 	"scripts": {
 		"build": "babel src --out-dir dist",
-		"test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/**/*.test.js src/**/**/*.test.js",
-		"testMon": "nodemon --watch src --exec \"NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/**/*.test.js src/**/**/*.test.js\""
+		"test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js",
+		"testMon": "nodemon --watch src --exec \"NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js\""
 	},
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/irrelon/fdb-core.git"
 	},
-	"main": "./index",
+	"main": "./src/main.js",
 	"bugs": {
 		"url": "http://github.com/irrelon/fdb-core/issues"
 	},

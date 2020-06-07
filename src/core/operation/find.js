@@ -8,7 +8,7 @@ import {queryToPipeline} from "./build";
  * @param {Object} query A query object.
  * @returns {Array} The array of data that matched the passed query.
  */
-const find = (data, query) => {
+export const find = (data, query) => {
 	// Break query into operations
 	const pipeline = queryToPipeline(query);
 	
@@ -32,8 +32,8 @@ const find = (data, query) => {
  * @param {Object} query A query object.
  * @returns {Array} The array of data that matched the passed query.
  */
-const findDeep = (data, query) => {
-
+export const findDeep = (data, query) => {
+	return [];
 };
 
 // TODO support calling explain that returns a query plan

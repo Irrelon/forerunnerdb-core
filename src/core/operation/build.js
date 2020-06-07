@@ -9,7 +9,7 @@ export const queryFromObject = (obj) => {
 	});
 }
 
-const genericOperation = (op = "") => (path, value, typeData) => {
+export const genericOperation = (op = "") => (path, value, typeData) => {
 	return {
 		op,
 		"type": typeData.type,
@@ -36,7 +36,7 @@ export const objectToArray = (obj) => {
 	});
 };
 
-const reduceArray = (arr) => {
+export const reduceArray = (arr) => {
 	if (!Array.isArray(arr)) return arr;
 	return arr.reduce((finalArr, item) => {
 		if (Array.isArray(item)) {
@@ -48,7 +48,7 @@ const reduceArray = (arr) => {
 	}, []);
 };
 
-const gateOperation = (op) => (path, value) => {
+export const gateOperation = (op) => (path, value) => {
 	const finalValue = (() => {
 		return value.reduce((itemArr, item) => {
 			if (!Array.isArray(item) && Object.keys(item).length > 1) {

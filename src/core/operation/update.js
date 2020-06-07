@@ -11,7 +11,7 @@ import {queryToPipeline} from "./build";
  * @param {Object} [options] An options object.
  * @returns {Array} The array of data that matched the passed query.
  */
-const update = (data, query, update = {}, options = {}) => {
+export const update = (data, query, update = {}, options = {}) => {
 	// Break query into operations
 	const pipeline = queryToPipeline(query);
 	const updated = [];
