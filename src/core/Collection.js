@@ -8,6 +8,14 @@ import OperationSuccess from "../operations/OperationSuccess";
 import find from "./operation/find";
 import update from "./operation/update";
 
+/**
+ * @typedef {Object} InsertOptions
+ * @property {Boolean} [atomic=false] If true, any insert failure will roll back all
+ * documents in the `data` argument.
+ * @property {Boolean} [ordered=false] If true, inserts will stop at any failure but
+ * previously inserted documents will still remain inserted.
+ */
+
 class Collection extends CoreClass {
 	constructor (name) {
 		super();
@@ -176,7 +184,13 @@ class Collection extends CoreClass {
 			}});
 		}
 	};
-	
+
+	/**
+	 * Insert a document into the collection.
+	 * @param {Object|Array} data The document or array of documents to insert.
+	 * @param {InsertOptions} [options={atomic: false, ordered: false}] Options object.
+	 * @returns {Object}
+	 */
 	insert (data, options = {atomic: false, ordered: false}) {
 		const isArray = Array.isArray(data);
 		const isAtomic = options.atomic === true;

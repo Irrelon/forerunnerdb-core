@@ -1,14 +1,16 @@
 /**
- * @typedef {"undefined"|"object"|"boolean"|"number"|"string"|"function"|"symbol"|"null"|"array"|"unknown"|"bigint"} TypeString
+ * @typedef {String} TypeString A string describing a JavaScript primative type
+ * limited to "undefined", "object", "boolean", "number", "string", "function",
+ * "symbol", "null", "array", "unknown" and "bigint".
  */
 
 /**
  * @typedef ExtendedTypeObject {Object}
- * @property isFlat {boolean} Is true if the type is non-recursive. Instances
+ * @property {Boolean} isFlat Is true if the type is non-recursive. Instances
  * such as Date or RegExp are considered flat as they do not contain sub-object
  * data that is usefully recursive.
  * @property {TypeString} type The name of the type
- * @property {string} [instance] If the type is an object, this will be the name
+ * @property {String} [instance] If the type is an object, this will be the name
  * of the constructor as reported by obj.constructor.name.
  */
 
