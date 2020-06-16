@@ -1,4 +1,3 @@
-import {pushVal as pathPushVal} from "@irrelon/path";
 import {
 	testFlight,
 	EnumTestFlightResult
@@ -37,6 +36,10 @@ import {
  * @returns {Promise<InsertResult>} The result of the insert operation.
  */
 export const insert = async (dataArr, insertArr, options = {}) => {
+	if (!Array.isArray(insertArr)) {
+		insertArr = [insertArr];
+	}
+	
 	const inserted = [];
 	const notInserted = [];
 	
@@ -84,7 +87,7 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 		inserted.push(updatedDoc);
 	}
 	
-	if (!options.$skipAssignment) {
+	if (!options.$skipAssignment && inserted.length) {
 		// Update the document array
 		dataArr.push(...inserted);
 	}
