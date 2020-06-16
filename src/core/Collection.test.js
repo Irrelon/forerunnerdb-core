@@ -81,7 +81,7 @@ describe("Collection", () => {
 				{"_id": 20, "item": "lamp", "qty": 50, "type": "desk"},
 				{"_id": 21, "item": "lamp", "qty": 20, "type": "floor"},
 				{"_id": 22, "item": "bulk", "qty": 100}
-			], {"ordered": true});
+			], {"$ordered": true});
 			
 			assert.strictEqual(result.nInserted, 3, "Number of inserted documents is correct");
 		});
@@ -92,7 +92,7 @@ describe("Collection", () => {
 				{"_id": 20, "item": "lamp", "qty": 50, "type": "desk"},
 				{"_id": 21, "item": "lamp", "qty": 20, "type": "floor"},
 				{"_id": 22, "item": "bulk", "qty": 100}
-			], {"ordered": false});
+			], {"$ordered": false});
 			
 			assert.strictEqual(result.nInserted, 3, "Number of inserted documents is correct");
 		});
@@ -103,7 +103,7 @@ describe("Collection", () => {
 				{"_id": 30, "item": "lamp", "qty": 50, "type": "desk"},
 				{"_id": 30, "item": "lamp", "qty": 20, "type": "floor"},
 				{"_id": 32, "item": "bulk", "qty": 100}
-			], {"ordered": true});
+			], {"$ordered": true});
 			
 			// The below number should be 1 because we are inserting ordered so on the
 			// second insert (which will fail) the operation should stop
@@ -120,7 +120,7 @@ describe("Collection", () => {
 				{"_id": 40, "item": "lamp", "qty": 20, "type": "floor"},
 				{"_id": 42, "item": "bulk", "qty": 100},
 				{"_id": 40, "item": "lamp", "qty": 20, "type": "floor"}
-			], {"ordered": false});
+			], {"$ordered": false});
 			
 			assert.strictEqual(result.nInserted, 2, "Number of inserted documents is correct");
 			assert.strictEqual(result.nFailed, 2, "Number of failed documents is correct");

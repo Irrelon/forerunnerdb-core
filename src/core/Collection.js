@@ -10,9 +10,9 @@ import update from "./operation/update";
 
 /**
  * @typedef {Object} InsertOptions
- * @property {Boolean} [atomic=false] If true, any insert failure will roll back all
+ * @property {Boolean} [$atomic=false] If true, any insert failure will roll back all
  * documents in the `data` argument.
- * @property {Boolean} [ordered=false] If true, inserts will stop at any failure but
+ * @property {Boolean} [$ordered=false] If true, inserts will stop at any failure but
  * previously inserted documents will still remain inserted.
  */
 
@@ -205,13 +205,13 @@ class Collection extends CoreClass {
 	/**
 	 * Insert a document or array of documents into the collection.
 	 * @param {Object|Array} data The document or array of documents to insert.
-	 * @param {InsertOptions} [options={atomic: false, ordered: false}] Options object.
+	 * @param {InsertOptions} [options={$atomic: false, $ordered: false}] Options object.
 	 * @returns {InsertResult} The result of the insert operation.
 	 */
-	insert (data, options = {"atomic": false, "ordered": false}) {
+	insert (data, options = {"$atomic": false, "$ordered": false}) {
 		const isArray = Array.isArray(data);
-		const isAtomic = options.atomic === true;
-		const isOrdered = options.ordered === true;
+		const isAtomic = options.$atomic === true;
+		const isOrdered = options.$ordered === true;
 		
 		const insertResult = {
 			"operation": {
