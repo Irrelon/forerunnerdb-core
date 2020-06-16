@@ -23,14 +23,22 @@ import {
  */
 
 /**
+ * @typedef {Object} InsertResult
+ * @property {Array<Object>} inserted The array of documents that got inserted.
+ * @property {Array<Object>} notInserted The array of documents that did not get
+ * inserted.
+ */
+
+/**
  * Inserts a document or array of documents into the passed `dataArr`.
  * @param {Array<Object>} dataArr The array of data to query.
  * @param {Object|Array<Object>} insertArr A document or array of documents to insert.
  * @param {InsertOptions} [options] An options object.
- * @returns {Promise<Array<Object>>} The array of data that inserted successfully.
+ * @returns {Promise<InsertResult>} The result of the insert operation.
  */
 export const insert = async (dataArr, insertArr, options = {}) => {
 	const inserted = [];
+	const notInserted = [];
 	
 	const preFlightArr = [];
 	const postFlightArr = [];
@@ -44,9 +52,7 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 	}
 	
 	const executeFlight = (doc) => {
-		return pathPushVal(dataArr, "", doc, {
-			"immutable": true
-		});
+		return {...doc};
 	};
 	
 	// Loop through each item of data and insert it
@@ -58,9 +64,22 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 		});
 		
 		// If we failed testFlight, skip to the next record
-		if (updatedDoc === EnumTestFlightResult.CANCEL) continue;
-		if (updatedDoc === EnumTestFlightResult.CANCEL_ORDERED) break;
-		if (updatedDoc === EnumTestFlightResult.CANCEL_ATOMIC) return [];
+		if (updatedDoc === EnumTestFlightResult.CANCEL) {
+			notInserted.push(originalDoc);
+			continue;
+		}
+
+		if (updatedDoc === EnumTestFlightResult.CANCEL_ORDERED) {
+			notInserted.push(originalDoc);
+			break;
+		}
+
+		if (updatedDoc === EnumTestFlightResult.CANCEL_ATOMIC) {
+			return {
+				"inserted": [],
+				"notInserted": insertArr
+			};
+		}
 		
 		inserted.push(updatedDoc);
 	}
@@ -70,8 +89,10 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 		dataArr.push(...inserted);
 	}
 	
-	return inserted;
+	return {
+		inserted,
+		notInserted
+	};
 };
 
 export default insert;
-// TODO write unit tests for this and then move Collection.insert to use it

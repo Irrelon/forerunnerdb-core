@@ -2,37 +2,30 @@ import assert from "assert";
 import {insert} from "./insert";
 
 describe("insert", () => {
-	it("By query", async () => {
-		const dataArr = [{
+	it("Into empty array", async () => {
+		const dataArr = [];
+
+		assert.strictEqual(dataArr.length, 0, "Number of documents is correct");
+
+		const insertResult = await insert(dataArr, [{
 			"_id": "1",
-			"foo": true
-		}, {
-			"_id": "2",
-			"foo": true
-		}];
-
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-
-		const insertResult = await insert(dataArr, {
 			"foo": false,
 			"newVal": "bar"
-		});
+		}]);
 
-		assert.strictEqual(insertResult.length, 1, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
-		assert.strictEqual(dataArr[0].foo, false, "Correct value");
+		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
+		assert.strictEqual(insertResult.notInserted.length, 0, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 1, "Number of documents is correct");
+		assert.strictEqual(dataArr[0]._id, "1", "Value is correct");
+		assert.strictEqual(dataArr[0].foo, false, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
 			"foo": false,
 			"newVal": "bar"
-		}, {
-			"_id": "2",
-			"foo": true
 		}], "Correct value");
 	});
 	
-	it("Using $one", async () => {
+	it("Into populated array", async () => {
 		const dataArr = [{
 			"_id": "1",
 			"foo": true
@@ -43,22 +36,27 @@ describe("insert", () => {
 		
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		
-		const insertResult = await insert(dataArr, {
+		const insertResult = await insert(dataArr, [{
+			"_id": "3",
 			"foo": false,
 			"newVal": "bar"
-		});
-		
-		assert.strictEqual(insertResult.length, 1, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
-		assert.strictEqual(dataArr[0].foo, false, "Correct value");
+		}]);
+
+		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
+		assert.strictEqual(dataArr[2]._id, "3", "Value is correct");
+		assert.strictEqual(dataArr[2].foo, false, "Value is correct");
+		assert.strictEqual(dataArr[2].newVal, "bar", "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
-			"foo": false,
-			"newVal": "bar"
+			"foo": true
 		}, {
 			"_id": "2",
 			"foo": true
+		}, {
+			"_id": "3",
+			"foo": false,
+			"newVal": "bar"
 		}], "Correct value");
 	});
 
@@ -73,15 +71,15 @@ describe("insert", () => {
 
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 
-		const insertResult = await insert(dataArr, {
+		const insertResult = await insert(dataArr, [{
 			"foo": false,
 			"newVal": "bar"
-		}, {
+		}], {
 			"$skipAssignment": true
 		});
 
-		assert.strictEqual(insertResult.length, 1, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
 		assert.notStrictEqual(dataArr, insertResult, "Data has been immutably updated");
 		assert.notStrictEqual(dataArr[0], insertResult[0], "Data has been immutably updated");
 		assert.deepStrictEqual(dataArr, [{
@@ -91,8 +89,7 @@ describe("insert", () => {
 			"_id": "2",
 			"foo": true
 		}], "Correct value");
-		assert.deepStrictEqual(insertResult, [{
-			"_id": "1",
+		assert.deepStrictEqual(insertResult.inserted, [{
 			"foo": false,
 			"newVal": "bar"
 		}], "Correct value");
@@ -109,19 +106,21 @@ describe("insert", () => {
 		
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		
-		const insertResult = await insert(dataArr, {
+		const insertResult = await insert(dataArr, [{
+			"_id": "3",
 			"foo": false,
 			"newVal": "bar"
-		}, {
+		}], {
 			"$preFlight": (doc) => {
-				return doc._id !== "1";
+				return doc._id !== "3";
 			}
 		});
-		
-		assert.strictEqual(insertResult.length, 0, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
-		assert.strictEqual(dataArr[0].foo, true, "Correct value");
+
+		assert.strictEqual(insertResult.inserted.length, 0, "Number of documents is correct");
+		assert.strictEqual(insertResult.notInserted.length, 1, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
+		assert.strictEqual(dataArr[0]._id, "1", "Value is correct");
+		assert.strictEqual(dataArr[0].foo, true, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
 			"foo": true
@@ -143,18 +142,20 @@ describe("insert", () => {
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		
 		const insertResult = await insert(dataArr, {
+			"_id": "3",
 			"foo": false,
 			"newVal": "bar"
 		}, {
 			"$preFlight": (doc) => {
-				return doc._id === "1";
+				return doc._id === "3";
 			}
 		});
-		
-		assert.strictEqual(insertResult.length, 1, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
-		assert.strictEqual(dataArr[0].foo, false, "Correct value");
+
+		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
+		assert.strictEqual(insertResult.notInserted.length, 0, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
+		assert.strictEqual(dataArr[2]._id, "3", "Value is correct");
+		assert.strictEqual(dataArr[2].foo, false, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
 			"foo": false,
@@ -188,10 +189,11 @@ describe("insert", () => {
 			}
 		});
 		
-		assert.strictEqual(insertResult.length, 0, "Number of documents is correct");
+		assert.strictEqual(insertResult.inserted.length, 0, "Number of documents is correct");
+		assert.strictEqual(insertResult.notInserted.length, 1, "Number of documents is correct");
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
-		assert.strictEqual(dataArr[0].foo, true, "Correct value");
+		assert.strictEqual(dataArr[0]._id, "1", "Value is correct");
+		assert.strictEqual(dataArr[0].foo, true, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
 			"foo": true
@@ -223,11 +225,12 @@ describe("insert", () => {
 				return updatedDoc._id === "1";
 			}
 		});
-		
-		assert.strictEqual(insertResult.length, 1, "Number of documents is correct");
+
+		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
+		assert.strictEqual(insertResult.notInserted.length, 0, "Number of documents is correct");
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
-		assert.strictEqual(dataArr[0].foo, false, "Correct value");
+		assert.strictEqual(dataArr[0]._id, "1", "Value is correct");
+		assert.strictEqual(dataArr[0].foo, false, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
 			"foo": false,
