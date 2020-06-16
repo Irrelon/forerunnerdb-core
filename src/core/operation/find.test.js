@@ -71,7 +71,7 @@ describe("find()", () => {
 		
 		it("Matches based on gated sub-documents", () => {
 			const query = {
-				$or: [{
+				"$or": [{
 					"arr": {
 						"goof": true,
 						"fun": false

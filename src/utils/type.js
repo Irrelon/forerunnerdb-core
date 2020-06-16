@@ -23,10 +23,10 @@
  */
 export const type = (item) => {
 	if (item === null) {
-		return 'null';
+		return "null";
 	}
 	if (Array.isArray(item)) {
-		return 'array';
+		return "array";
 	}
 	
 	return typeof item;
@@ -41,15 +41,15 @@ export const type = (item) => {
  */
 export const extendedType = (item) => {
 	const typeData = {
-		isFlat: false,
-		instance: "",
-		type: "foo"
+		"isFlat": false,
+		"instance": "",
+		"type": "foo"
 	};
 	
 	if (item === null) {
-		typeData.type = 'null';
+		typeData.type = "null";
 	} else if (Array.isArray(item)) {
-		typeData.type = 'array';
+		typeData.type = "array";
 	} else {
 		typeData.type = typeof item;
 		

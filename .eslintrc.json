@@ -2,6 +2,9 @@
 	"extends": [
 		"eslint-config-irrelon"
 	],
+	"rules": {
+		"semi": 1
+	},
 	"env": {
 		"browser": true,
 		"node": true,

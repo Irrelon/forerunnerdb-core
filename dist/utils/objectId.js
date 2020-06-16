@@ -1,7 +1,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	"value": true
 });
 exports["default"] = void 0;
 var idCounter = 0;
@@ -14,26 +14,26 @@ var idCounter = 0;
  * @return {String} A string ID.
  */
 
-var objectId = function objectId(str) {
-  var pow = Math.pow(10, 17);
-  var id;
+var objectId = function objectId (str) {
+	var pow = Math.pow(10, 17);
+	var id;
 
-  if (!str) {
-    idCounter++;
-    id = (idCounter + (Math.random() * pow + Math.random() * pow + Math.random() * pow + Math.random() * pow)).toString(16);
-  } else {
-    var count = str.length;
-    var val = 0;
-    var i;
+	if (!str) {
+		idCounter++;
+		id = (idCounter + (Math.random() * pow + Math.random() * pow + Math.random() * pow + Math.random() * pow)).toString(16);
+	} else {
+		var count = str.length;
+		var val = 0;
+		var i;
 
-    for (i = 0; i < count; i++) {
-      val += str.charCodeAt(i) * pow;
-    }
+		for (i = 0; i < count; i++) {
+			val += str.charCodeAt(i) * pow;
+		}
 
-    id = val.toString(16);
-  }
+		id = val.toString(16);
+	}
 
-  return id;
+	return id;
 };
 
 var _default = objectId;

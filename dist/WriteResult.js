@@ -1,7 +1,7 @@
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	"value": true
 });
 exports["default"] = void 0;
 
@@ -29,29 +29,29 @@ exports["default"] = void 0;
  * @param {WriteResult} data The write result.
  * @constructor
  */
-var WriteResult = function WriteResult(_ref) {
-  var _ref$nInserted = _ref.nInserted,
-      nInserted = _ref$nInserted === void 0 ? 0 : _ref$nInserted,
-      _ref$nMatched = _ref.nMatched,
-      nMatched = _ref$nMatched === void 0 ? 0 : _ref$nMatched,
-      _ref$nModified = _ref.nModified,
-      nModified = _ref$nModified === void 0 ? 0 : _ref$nModified,
-      _ref$nUpserted = _ref.nUpserted,
-      nUpserted = _ref$nUpserted === void 0 ? 0 : _ref$nUpserted,
-      _ref$nRemoved = _ref.nRemoved,
-      nRemoved = _ref$nRemoved === void 0 ? 0 : _ref$nRemoved,
-      _ref$_id = _ref._id,
-      _id = _ref$_id === void 0 ? undefined : _ref$_id,
-      _ref$writeError = _ref.writeError,
-      writeError = _ref$writeError === void 0 ? undefined : _ref$writeError;
+var WriteResult = function WriteResult (_ref) {
+	var _ref$nInserted = _ref.nInserted,
+		nInserted = _ref$nInserted === void 0 ? 0 : _ref$nInserted,
+		_ref$nMatched = _ref.nMatched,
+		nMatched = _ref$nMatched === void 0 ? 0 : _ref$nMatched,
+		_ref$nModified = _ref.nModified,
+		nModified = _ref$nModified === void 0 ? 0 : _ref$nModified,
+		_ref$nUpserted = _ref.nUpserted,
+		nUpserted = _ref$nUpserted === void 0 ? 0 : _ref$nUpserted,
+		_ref$nRemoved = _ref.nRemoved,
+		nRemoved = _ref$nRemoved === void 0 ? 0 : _ref$nRemoved,
+		_ref$_id = _ref._id,
+		_id = _ref$_id === void 0 ? undefined : _ref$_id,
+		_ref$writeError = _ref.writeError,
+		writeError = _ref$writeError === void 0 ? undefined : _ref$writeError;
 
-  this._id = _id;
-  this.nInserted = nInserted;
-  this.nMatched = nMatched;
-  this.nModified = nModified;
-  this.nUpserted = nUpserted;
-  this.nRemoved = nRemoved;
-  this.writeError = writeError;
+	this._id = _id;
+	this.nInserted = nInserted;
+	this.nMatched = nMatched;
+	this.nModified = nModified;
+	this.nUpserted = nUpserted;
+	this.nRemoved = nRemoved;
+	this.writeError = writeError;
 };
 
 var _default = WriteResult;

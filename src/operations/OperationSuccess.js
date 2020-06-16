@@ -7,7 +7,7 @@ class OperationSuccess extends CoreClass {
 		"INSERT_SUCCESS": "INSERT_SUCCESS"
 	};
 	
-	constructor (data = {"type": OperationSuccess.constants.UNDEFINED_SUCCESS, meta: {}}) {
+	constructor (data = {"type": OperationSuccess.constants.UNDEFINED_SUCCESS, "meta": {}}) {
 		super();
 		
 		this.type = data.type;

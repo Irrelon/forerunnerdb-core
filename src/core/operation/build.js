@@ -4,10 +4,10 @@ import {flattenValues, join as pathJoin} from "@irrelon/path";
 
 export const queryFromObject = (obj) => {
 	return flattenValues(obj, undefined, "", {
-		transformKey: (key, info) => info.isArrayIndex ? "$" : key,
-		leavesOnly: true
+		"transformKey": (key, info) => info.isArrayIndex ? "$" : key,
+		"leavesOnly": true
 	});
-}
+};
 
 export const genericOperation = (op = "") => (path, value, typeData) => {
 	return {
@@ -69,7 +69,7 @@ export const gateOperation = (op) => (path, value) => {
 		"instance": "",
 		"path": "",
 		"value": finalValue
-	}
+	};
 };
 
 export const $and = gateOperation("$and");

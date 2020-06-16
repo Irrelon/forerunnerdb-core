@@ -16,6 +16,22 @@ import update from "./operation/update";
  * previously inserted documents will still remain inserted.
  */
 
+/**
+ * @typedef {Object} InsertResult
+ * @property {Object} operation Describes the operation being carried out.
+ * @property {Boolean} operation.isArray If true, the insert data is an array of
+ * documents.
+ * @property {Boolean} operation.isAtomic True if the operation is atomic.
+ * @property {Boolean} operation.isOrdered True if the operation is ordered.
+ * @property {Object|Array} operation.data The data passed to the operation.
+ * @property {Object} [stage] Describes the stages the operation took.
+ * @property {Object} [state.preflight] Any preflight stage information.
+ * @property {Object} [state.postflight] Any postflight stage information.
+ * @property {Object} [state.execute] Any execute stage information.
+ * @property {Number} nInserted The number of documents inserted.
+ * @property {Number} nFailed The number of documents that failed to insert.
+ */
+
 class Collection extends CoreClass {
 	constructor (name) {
 		super();
@@ -26,38 +42,39 @@ class Collection extends CoreClass {
 		this._data = [];
 		this._index = [{
 			"name": "primaryKey",
-			"index": new IndexHashMap({[this._primaryKey]: 1}, {unique: true})
+			"index": new IndexHashMap({[this._primaryKey]: 1}, {"unique": true})
 		}];
 	}
 	
 	/**
 	 * Checks for a primary key on the document and assigns one if none
 	 * currently exists.
-	 * @param {Object} obj The object to check a primary key against.
+	 * @param {Object} doc The document to check a primary key against.
+	 * @returns {Object} The document passed in `obj`.
 	 * @private
 	 */
-	ensurePrimaryKey = function (obj) {
-		if (pathGet(obj, this._primaryKey) === undefined) {
+	ensurePrimaryKey = function (doc) {
+		if (pathGet(doc, this._primaryKey) === undefined) {
 			// Assign a primary key automatically
-			return pathSetImmutable(obj, this._primaryKey, objectId());
+			return pathSetImmutable(doc, this._primaryKey, objectId());
 		}
 		
-		return obj;
+		return doc;
 	};
 	
-	_indexInsert (data) {
+	_indexInsert (doc) {
 		// Return true if we DIDN'T find an error
 		return !this._index.find((indexObj) => {
 			// Return true (found an error) if the result was false
-			return indexObj.index.insert(data) === false;
+			return indexObj.index.insert(doc) === false;
 		});
 	}
 	
 	/**
 	 * Scans the collection indexes and checks that the passed doc does
 	 * not violate any index constraints.
-	 * @param doc
-	 * @param options
+	 * @param {Object} doc The document to check.
+	 * @param {Object} [options] An options object.
 	 * @returns {Array<OperationSuccess|OperationFailure>} An array of
 	 * operation results.
 	 */
@@ -74,9 +91,9 @@ class Collection extends CoreClass {
 			// Check if the index has a unique flag, if not it cannot violate
 			// so early exit
 			if (!indexObj.index.isUnique()) return new OperationSuccess({
-				type: OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS,
-				meta: {
-					indexName: indexObj.name,
+				"type": OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS,
+				"meta": {
+					"indexName": indexObj.name,
 					doc
 				}
 			});
@@ -86,9 +103,9 @@ class Collection extends CoreClass {
 			
 			if (wouldBeViolated) {
 				return new OperationFailure({
-					type: OperationFailure.constants.INDEX_VIOLATION,
-					meta: {
-						indexName: indexObj.name,
+					"type": OperationFailure.constants.INDEX_VIOLATION,
+					"meta": {
+						"indexName": indexObj.name,
 						hash,
 						doc
 					}
@@ -99,9 +116,9 @@ class Collection extends CoreClass {
 				}
 				
 				return new OperationSuccess({
-					type: OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS,
-					meta: {
-						indexName: indexObj.name,
+					"type": OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS,
+					"meta": {
+						"indexName": indexObj.name,
 						hash,
 						doc
 					}
@@ -170,28 +187,28 @@ class Collection extends CoreClass {
 		}
 	}
 	
-	pushData = (data) => {
-		const finalData = this.ensurePrimaryKey(data);
+	pushData = (doc) => {
+		const finalDoc = this.ensurePrimaryKey(doc);
 		
-		if (this._indexInsert(finalData)) {
-			this._data.push(finalData);
-			return new OperationSuccess({type: OperationSuccess.constants.INSERT_SUCCESS, meta: {
-				doc: finalData
+		if (this._indexInsert(finalDoc)) {
+			this._data.push(finalDoc);
+			return new OperationSuccess({"type": OperationSuccess.constants.INSERT_SUCCESS, "meta": {
+				"doc": finalDoc
 			}});
 		} else {
-			return new OperationFailure({type: OperationFailure.constants.INSERT_FAILURE, meta: {
-				doc: finalData
+			return new OperationFailure({"type": OperationFailure.constants.INSERT_FAILURE, "meta": {
+				"doc": finalDoc
 			}});
 		}
 	};
 
 	/**
-	 * Insert a document into the collection.
+	 * Insert a document or array of documents into the collection.
 	 * @param {Object|Array} data The document or array of documents to insert.
 	 * @param {InsertOptions} [options={atomic: false, ordered: false}] Options object.
-	 * @returns {Object}
+	 * @returns {InsertResult} The result of the insert operation.
 	 */
-	insert (data, options = {atomic: false, ordered: false}) {
+	insert (data, options = {"atomic": false, "ordered": false}) {
 		const isArray = Array.isArray(data);
 		const isAtomic = options.atomic === true;
 		const isOrdered = options.ordered === true;
@@ -217,13 +234,13 @@ class Collection extends CoreClass {
 		
 		// 2 Check for index violations against itself when inserted
 		insertResult.stage.postflight = this.operation(data, this.indexViolationCheck, {
-			insert: true,
-			breakOnFailure: isOrdered,
-			indexArray: this._index.map((indexObj) => {
+			"insert": true,
+			"breakOnFailure": isOrdered,
+			"indexArray": this._index.map((indexObj) => {
 				return {
 					...indexObj,
-					index: indexObj.index.replicate()
-				}
+					"index": indexObj.index.replicate()
+				};
 			})
 		});
 		
@@ -237,10 +254,10 @@ class Collection extends CoreClass {
 		
 		// 4 If not atomic, run through only allowed operations and complete them
 		if (isOrdered) {
-			const result = this.operation(data, this.pushData, {breakOnFailure: true});
+			const result = this.operation(data, this.pushData, {"breakOnFailure": true});
 			insertResult.nInserted = result.success.length;
 		} else {
-			const result = this.operation(data, this.pushData, {breakOnFailure: false});
+			const result = this.operation(data, this.pushData, {"breakOnFailure": false});
 			insertResult.nInserted = result.success.length;
 		}
 		
@@ -291,7 +308,7 @@ class Collection extends CoreClass {
 	}
 	
 	removeOne (queryObj, options) {
-		return this.remove(queryObj, {...options, "$one": true})
+		return this.remove(queryObj, {...options, "$one": true});
 	}
 	
 	removeMany (queryObj, options) {

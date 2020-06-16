@@ -21,7 +21,7 @@ export const find = (data, query) => {
 	}*/
 	
 	// Loop through each item of data and return a final filtered array
-	return data.filter((item) => matchPipeline(pipeline, item, {originalQuery: query}));
+	return data.filter((item) => matchPipeline(pipeline, item, {"originalQuery": query}));
 };
 
 /**

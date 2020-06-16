@@ -38,6 +38,8 @@
 	},
 	"scripts": {
 		"build": "babel src --out-dir dist",
+		"eslint": "eslint ./src",
+		"eslint-fix": "eslint --fix ./src",
 		"test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js",
 		"testMon": "nodemon --watch src --exec \"NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js\""
 	},
@@ -54,6 +56,7 @@
 		"@babel/runtime": "^7.9.2",
 		"@irrelon/emitter": "^3.0.0",
 		"@irrelon/path": "^4.6.4",
+		"eslint": "^7.2.0",
 		"irrelon-log": "^2.0.3"
 	},
 	"devDependencies": {
@@ -67,9 +70,12 @@
 		"@babel/register": "^7.4.4",
 		"@types/assert": "^1.4.6",
 		"@types/mocha": "^7.0.2",
+		"babel-eslint": "^10.1.0",
 		"babel-loader": "^8.0.5",
+		"babel-plugin-const-enum": "^1.0.1",
 		"enzyme": "^3.9.0",
 		"enzyme-adapter-react-16": "^1.12.1",
+		"eslint-config-irrelon": "^1.0.10",
 		"express": "^4.16.4",
 		"jsdom": "^15.0.0",
 		"mocha": "^6.1.4",

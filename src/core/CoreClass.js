@@ -8,11 +8,11 @@ class CoreClass {
 	synthesize (name) {
 		_synth[name] = _synth[name] || function (val) {
 			if (val !== undefined) {
-				this['_' + name] = val;
+				this["_" + name] = val;
 				return this;
 			}
 			
-			return this['_' + name];
+			return this["_" + name];
 		};
 		
 		return _synth[name];

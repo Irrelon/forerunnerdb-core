@@ -24,7 +24,7 @@ class OperationResult extends CoreClass {
 				this.addResult(item);
 			});
 			
-			return;
+			return this;
 		}
 		
 		if (op instanceof OperationFailure) {
@@ -41,6 +41,7 @@ class OperationResult extends CoreClass {
 	/**
 	 * Add an failure to the operation result.
 	 * @param {OperationFailure|Array<OperationFailure>} failure The failure or array of failures.
+	 * @returns {OperationResult} Returns a pointer to itself.
 	 */
 	addFailure (failure) {
 		if (Array.isArray(failure)) {
@@ -48,15 +49,17 @@ class OperationResult extends CoreClass {
 				this.addFailure(item);
 			});
 			
-			return;
+			return this;
 		}
 		
 		this.failure.push(failure);
+		return this;
 	}
 	
 	/**
 	 * Add a success to the operation result.
 	 * @param {OperationSuccess|Array<OperationSuccess>} success The success or array of successes.
+	 * @returns {OperationResult} Returns a pointer to itself.
 	 */
 	addSuccess (success) {
 		if (Array.isArray(success)) {
@@ -64,10 +67,11 @@ class OperationResult extends CoreClass {
 				this.addSuccess(item);
 			});
 			
-			return;
+			return this;
 		}
 		
 		this.success.push(success);
+		return this;
 	}
 }
 

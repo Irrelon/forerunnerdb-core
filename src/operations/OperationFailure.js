@@ -7,7 +7,7 @@ class OperationFailure extends CoreClass {
 		"INSERT_FAILURE": "INSERT_FAILURE"
 	};
 	
-	constructor (data = {"type": OperationFailure.constants.UNDEFINED_FAILURE, meta: {}}) {
+	constructor (data = {"type": OperationFailure.constants.UNDEFINED_FAILURE, "meta": {}}) {
 		super();
 		
 		this.type = data.type;

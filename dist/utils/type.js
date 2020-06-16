@@ -3,7 +3,7 @@
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	"value": true
 });
 exports.extendedType = exports.type = void 0;
 
@@ -30,16 +30,16 @@ var _typeof2 = _interopRequireDefault(require("@babel/runtime/helpers/typeof"));
  * @param {*} item The item to get the type of.
  * @returns {TypeString}
  */
-var type = function type(item) {
-  if (item === null) {
-    return 'null';
-  }
+var type = function type (item) {
+	if (item === null) {
+		return "null";
+	}
 
-  if (Array.isArray(item)) {
-    return 'array';
-  }
+	if (Array.isArray(item)) {
+		return "array";
+	}
 
-  return (0, _typeof2["default"])(item);
+	return (0, _typeof2["default"])(item);
 };
 /**
  * Returns extended information about the type from the item passed.
@@ -52,30 +52,30 @@ var type = function type(item) {
 
 exports.type = type;
 
-var extendedType = function extendedType(item) {
-  var typeData = {
-    isFlat: false,
-    instance: "",
-    type: "foo"
-  };
+var extendedType = function extendedType (item) {
+	var typeData = {
+		"isFlat": false,
+		"instance": "",
+		"type": "foo"
+	};
 
-  if (item === null) {
-    typeData.type = 'null';
-  } else if (Array.isArray(item)) {
-    typeData.type = 'array';
-  } else {
-    typeData.type = (0, _typeof2["default"])(item);
+	if (item === null) {
+		typeData.type = "null";
+	} else if (Array.isArray(item)) {
+		typeData.type = "array";
+	} else {
+		typeData.type = (0, _typeof2["default"])(item);
 
-    if (typeData.type === "object") {
-      typeData.instance = item.constructor.name;
-    }
-  }
+		if (typeData.type === "object") {
+			typeData.instance = item.constructor.name;
+		}
+	}
 
-  if (typeData.type === "string" || typeData.type === "number" || typeData.type === "null" || typeData.type === "boolean" || typeData.instance === "Date" || typeData.instance === "RegExp") {
-    typeData.isFlat = true;
-  }
+	if (typeData.type === "string" || typeData.type === "number" || typeData.type === "null" || typeData.type === "boolean" || typeData.instance === "Date" || typeData.instance === "RegExp") {
+		typeData.isFlat = true;
+	}
 
-  return typeData;
+	return typeData;
 };
 
 exports.extendedType = extendedType;

@@ -41,9 +41,9 @@ describe("queryFromObject()", () => {
 describe("build", () => {
 	it("$eeq", () => {
 		const data = {
-			op: "$eeq",
-			path: "bar.name",
-			value: "Foo"
+			"op": "$eeq",
+			"path": "bar.name",
+			"value": "Foo"
 		};
 		
 		data.typeData = extendedType(data.value);
@@ -63,9 +63,9 @@ describe("build", () => {
 	
 	it("$eq", () => {
 		const data = {
-			op: "$eq",
-			path: "bar.name",
-			value: ["Foo", "Bar"]
+			"op": "$eq",
+			"path": "bar.name",
+			"value": ["Foo", "Bar"]
 		};
 		
 		data.typeData = extendedType(data.value);
@@ -85,9 +85,9 @@ describe("build", () => {
 	
 	it("$in", () => {
 		const data = {
-			op: "$in",
-			path: "bar.name",
-			value: ["Foo", "Bar"]
+			"op": "$in",
+			"path": "bar.name",
+			"value": ["Foo", "Bar"]
 		};
 		
 		data.typeData = extendedType(data.value);
@@ -134,7 +134,7 @@ describe("queryToPipeline()", () => {
 	it("Explicit $or nested", () => {
 		const query = {
 			"$or": [{
-				"bar.name": "Foo",
+				"bar.name": "Foo"
 			}, {
 				"bar.dt": {
 					"$gt": new Date("2020-01-01T00:00:00Z"),
@@ -144,7 +144,7 @@ describe("queryToPipeline()", () => {
 		};
 
 		const expected = {
-			"op":"$or",
+			"op": "$or",
 			"path": "",
 			"type": "array",
 			"instance": "",
@@ -215,7 +215,7 @@ describe("queryToPipeline()", () => {
 	
 	it("Explicit $and single tier, multi-sub-operations", () => {
 		const query = {
-			$and: [{
+			"$and": [{
 				"bar.foo": true
 			}, {
 				"bar.dt": {
@@ -226,30 +226,30 @@ describe("queryToPipeline()", () => {
 		};
 		
 		const expected = {
-			op: "$and",
-			path: "",
-			type: "array",
-			instance: "",
-			value: [{
-				path: "bar.foo",
-				value: true,
-				type: "boolean",
-				instance: "",
-				op: "$eeq"
+			"op": "$and",
+			"path": "",
+			"type": "array",
+			"instance": "",
+			"value": [{
+				"path": "bar.foo",
+				"value": true,
+				"type": "boolean",
+				"instance": "",
+				"op": "$eeq"
 			}, {
-				path: "bar.dt",
-				value: new Date("2020-02-01T00:00:00Z"),
-				type: "object",
-				instance: "Date",
-				op: "$gt"
+				"path": "bar.dt",
+				"value": new Date("2020-02-01T00:00:00Z"),
+				"type": "object",
+				"instance": "Date",
+				"op": "$gt"
 			}, {
-				path: "bar.dt",
-				value: new Date("2020-04-01T00:00:00Z"),
-				type: "object",
-				instance: "Date",
-				op: "$lte"
+				"path": "bar.dt",
+				"value": new Date("2020-04-01T00:00:00Z"),
+				"type": "object",
+				"instance": "Date",
+				"op": "$lte"
 			}]
-		}
+		};
 		
 		const result = queryToPipeline(query);
 		
@@ -359,18 +359,18 @@ describe("queryToPipeline()", () => {
 		};
 		
 		const expected = {
-			op: "$and",
-			path: "",
-			type: "array",
-			instance: "",
-			value: [{
-				path: "bar.name",
-				value: ["Amelia", "Andy"],
-				type: "array",
-				instance: "",
-				op: "$in"
+			"op": "$and",
+			"path": "",
+			"type": "array",
+			"instance": "",
+			"value": [{
+				"path": "bar.name",
+				"value": ["Amelia", "Andy"],
+				"type": "array",
+				"instance": "",
+				"op": "$in"
 			}]
-		}
+		};
 		
 		const result = queryToPipeline(query);
 		
@@ -387,30 +387,30 @@ describe("queryToPipeline()", () => {
 		};
 		
 		const expected = {
-			op: "$and",
-			instance: "",
-			path: "",
-			type: "array",
-			value: [{
-				op: "$eeq",
-				path: "bar.dt",
-				value: new Date("2020-03-01T00:00:00Z"),
-				type: "object",
-				instance: "Date"
+			"op": "$and",
+			"instance": "",
+			"path": "",
+			"type": "array",
+			"value": [{
+				"op": "$eeq",
+				"path": "bar.dt",
+				"value": new Date("2020-03-01T00:00:00Z"),
+				"type": "object",
+				"instance": "Date"
 			}, {
-				path: "bar.name",
-				value: ["Amelia", "Andy"],
-				type: "array",
-				instance: "",
-				op: "$in"
+				"path": "bar.name",
+				"value": ["Amelia", "Andy"],
+				"type": "array",
+				"instance": "",
+				"op": "$in"
 			}, {
-				path: "bar.name",
-				value: "Andy",
-				type: "string",
-				instance: "",
-				op: "$ne"
+				"path": "bar.name",
+				"value": "Andy",
+				"type": "string",
+				"instance": "",
+				"op": "$ne"
 			}]
-		}
+		};
 		
 		const result = queryToPipeline(query);
 		

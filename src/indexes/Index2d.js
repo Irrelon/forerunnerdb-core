@@ -13,10 +13,10 @@ primaryKey(string)
 collection(collection)
 */
 
-var Shared = require('./Shared'),
-	Path = require('./Path'),
-	BinaryTree = require('./BinaryTree'),
-	GeoHash = require('./GeoHash'),
+var Shared = require("./Shared"),
+	Path = require("./Path"),
+	BinaryTree = require("./BinaryTree"),
+	GeoHash = require("./GeoHash"),
 	sharedPathSolver = new Path(),
 	sharedGeoHashSolver = new GeoHash(),
 	// GeoHash Distances in Kilometers
@@ -74,10 +74,10 @@ Index2d.prototype.init = function (keys, options, collection) {
 	this._btree.debug(this._debug);
 };
 
-Shared.addModule('Index2d', Index2d);
-Shared.mixin(Index2d.prototype, 'Mixin.Common');
-Shared.mixin(Index2d.prototype, 'Mixin.ChainReactor');
-Shared.mixin(Index2d.prototype, 'Mixin.Sorting');
+Shared.addModule("Index2d", Index2d);
+Shared.mixin(Index2d.prototype, "Mixin.Common");
+Shared.mixin(Index2d.prototype, "Mixin.ChainReactor");
+Shared.mixin(Index2d.prototype, "Mixin.Sorting");
 
 Index2d.prototype.id = function () {
 	return this._id;
@@ -91,11 +91,11 @@ Index2d.prototype.size = function () {
 	return this._size;
 };
 
-Shared.synthesize(Index2d.prototype, 'data');
-Shared.synthesize(Index2d.prototype, 'name');
-Shared.synthesize(Index2d.prototype, 'collection');
-Shared.synthesize(Index2d.prototype, 'type');
-Shared.synthesize(Index2d.prototype, 'unique');
+Shared.synthesize(Index2d.prototype, "data");
+Shared.synthesize(Index2d.prototype, "name");
+Shared.synthesize(Index2d.prototype, "collection");
+Shared.synthesize(Index2d.prototype, "type");
+Shared.synthesize(Index2d.prototype, "unique");
 
 Index2d.prototype.keys = function (val) {
 	if (val !== undefined) {
@@ -114,8 +114,8 @@ Index2d.prototype.rebuild = function () {
 	if (this._collection) {
 		// Get sorted data
 		var collection = this._collection.subset({}, {
-				$decouple: false,
-				$orderBy: this._keys
+				"$decouple": false,
+				"$orderBy": this._keys
 			}),
 			collectionData = collection.find(),
 			dataIndex,
@@ -136,12 +136,12 @@ Index2d.prototype.rebuild = function () {
 	}
 
 	this._state = {
-		name: this._name,
-		keys: this._keys,
-		indexSize: this._size,
-		built: new Date(),
-		updated: new Date(),
-		ok: true
+		"name": this._name,
+		"keys": this._keys,
+		"indexSize": this._size,
+		"built": new Date(),
+		"updated": new Date(),
+		"ok": true
 	};
 };
 
@@ -239,7 +239,7 @@ Index2d.prototype.lookup = function (query, options, op) {
 		pathStr = keys[i].path;
 		pathVal = sharedPathSolver.get(query, pathStr);
 
-		if (typeof pathVal === 'object') {
+		if (typeof pathVal === "object") {
 			if (pathVal.$near) {
 				results = [];
 
@@ -284,7 +284,7 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 	// TODO: scan neighbours until we have covered the area otherwise we risk
 	// TODO: opening the results up to vastly more information as the box size
 	// TODO: increases dramatically between the geohash precisions
-	if (query.$distanceUnits === 'km') {
+	if (query.$distanceUnits === "km") {
 		maxDistanceKm = query.$maxDistance;
 
 		for (i = 0; i < geoHashDistance.length; i++) {
@@ -293,7 +293,7 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 				break;
 			}
 		}
-	} else if (query.$distanceUnits === 'miles') {
+	} else if (query.$distanceUnits === "miles") {
 		maxDistanceKm = query.$maxDistance * 1.60934;
 
 		for (i = 0; i < geoHashDistance.length; i++) {
@@ -309,15 +309,15 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 	}
 
 	// Calculate 9 box geohashes
-	if (op) { op.time('index2d.calculateHashArea'); }
+	if (op) { op.time("index2d.calculateHashArea"); }
 	neighbours = sharedGeoHashSolver.calculateHashArrayByRadius(query.$point, maxDistanceKm, precision);
-	if (op) { op.time('index2d.calculateHashArea'); }
+	if (op) { op.time("index2d.calculateHashArea"); }
 
 	if (op) {
-		op.data('index2d.near.precision', precision);
-		op.data('index2d.near.hashArea', neighbours);
-		op.data('index2d.near.maxDistanceKm', maxDistanceKm);
-		op.data('index2d.near.centerPointCoords', [query.$point[0], query.$point[1]]);
+		op.data("index2d.near.precision", precision);
+		op.data("index2d.near.hashArea", neighbours);
+		op.data("index2d.near.maxDistanceKm", maxDistanceKm);
+		op.data("index2d.near.centerPointCoords", [query.$point[0], query.$point[1]]);
 	}
 
 	// Lookup all matching co-ordinates from the btree
@@ -326,7 +326,7 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 	visitedData = {};
 	visitedNodes = [];
 
-	if (op) { op.time('index2d.near.getDocsInsideHashArea'); }
+	if (op) { op.time("index2d.near.getDocsInsideHashArea"); }
 	for (i = 0; i < neighbours.length; i++) {
 		search = this._btree.startsWith(pathStr, neighbours[i]);
 		visitedData[neighbours[i]] = search;
@@ -335,15 +335,15 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 		results = results.concat(search);
 	}
 	if (op) {
-		op.time('index2d.near.getDocsInsideHashArea');
-		op.data('index2d.near.startsWith', visitedData);
-		op.data('index2d.near.visitedTreeNodes', visitedNodes);
+		op.time("index2d.near.getDocsInsideHashArea");
+		op.data("index2d.near.startsWith", visitedData);
+		op.data("index2d.near.visitedTreeNodes", visitedNodes);
 	}
 
 	// Work with original data
-	if (op) { op.time('index2d.near.lookupDocsById'); }
+	if (op) { op.time("index2d.near.lookupDocsById"); }
 	results = this._collection._primaryIndex.lookup(results);
-	if (op) { op.time('index2d.near.lookupDocsById'); }
+	if (op) { op.time("index2d.near.lookupDocsById"); }
 
 	if (query.$distanceField) {
 		// Decouple the results before we modify them
@@ -353,7 +353,7 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 	if (results.length) {
 		distance = {};
 
-		if (op) { op.time('index2d.near.calculateDistanceFromCenter'); }
+		if (op) { op.time("index2d.near.calculateDistanceFromCenter"); }
 		// Loop the results and calculate distance
 		for (i = 0; i < results.length; i++) {
 			latLng = sharedPathSolver.get(results[i], pathStr);
@@ -363,7 +363,7 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 				if (query.$distanceField) {
 					// Options specify a field to add the distance data to
 					// so add it now
-					sharedPathSolver.set(results[i], query.$distanceField, query.$distanceUnits === 'km' ? distCache : Math.round(distCache * 0.621371));
+					sharedPathSolver.set(results[i], query.$distanceField, query.$distanceUnits === "km" ? distCache : Math.round(distCache * 0.621371));
 				}
 
 				if (query.$geoHashField) {
@@ -376,14 +376,14 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 				finalResults.push(results[i]);
 			}
 		}
-		if (op) { op.time('index2d.near.calculateDistanceFromCenter'); }
+		if (op) { op.time("index2d.near.calculateDistanceFromCenter"); }
 
 		// Sort by distance from center
-		if (op) { op.time('index2d.near.sortResultsByDistance'); }
-		finalResults.sort(function (a, b) {
+		if (op) { op.time("index2d.near.sortResultsByDistance"); }
+		finalResults.sort((a, b) => {
 			return self.sortAsc(distance[a[pk]], distance[b[pk]]);
 		});
-		if (op) { op.time('index2d.near.sortResultsByDistance'); }
+		if (op) { op.time("index2d.near.sortResultsByDistance"); }
 	}
 
 	// Return data
@@ -391,7 +391,7 @@ Index2d.prototype.near = function (pathStr, query, options, op) {
 };
 
 Index2d.prototype.geoWithin = function (pathStr, query, options) {
-	console.log('geoWithin() is currently a prototype method with no actual implementation... it just returns a blank array.');
+	console.log("geoWithin() is currently a prototype method with no actual implementation... it just returns a blank array.");
 	return [];
 };
 
@@ -424,14 +424,14 @@ Index2d.prototype.match = function (query, options) {
 Index2d.prototype._itemHash = function (item, keys) {
 	var path = new Path(),
 		pathData,
-		hash = '',
+		hash = "",
 		k;
 
 	pathData = path.parse(keys);
 
 	for (k = 0; k < pathData.length; k++) {
-		if (hash) { hash += '_'; }
-		hash += path.value(item, pathData[k].path).join(':');
+		if (hash) { hash += "_"; }
+		hash += path.value(item, pathData[k].path).join(":");
 	}
 
 	return hash;
@@ -440,13 +440,13 @@ Index2d.prototype._itemHash = function (item, keys) {
 Index2d.prototype._itemKeyHash = function (item, keys) {
 	var path = new Path(),
 		pathData,
-		hash = '',
+		hash = "",
 		k;
 
 	pathData = path.parse(keys);
 
 	for (k = 0; k < pathData.length; k++) {
-		if (hash) { hash += '_'; }
+		if (hash) { hash += "_"; }
 		hash += path.keyValue(item, pathData[k].path);
 	}
 
@@ -473,7 +473,7 @@ Index2d.prototype._itemHashArr = function (item, keys) {
 			} else {
 				// Loop the hash array and concat the value to it
 				for (j = 0; j < hashArr.length; j++) {
-					hashArr[j] = hashArr[j] + '_' + valArr[i];
+					hashArr[j] = hashArr[j] + "_" + valArr[i];
 				}
 			}
 		}
@@ -483,7 +483,7 @@ Index2d.prototype._itemHashArr = function (item, keys) {
 };
 
 // Register this index on the shared object
-Shared.index['2d'] = Index2d;
+Shared.index["2d"] = Index2d;
 
-Shared.finishModule('Index2d');
+Shared.finishModule("Index2d");
 module.exports = Index2d;

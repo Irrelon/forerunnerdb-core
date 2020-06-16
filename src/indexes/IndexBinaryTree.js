@@ -13,9 +13,9 @@ primaryKey(string)
 collection(collection)
 */
 
-var Shared = require('./Shared'),
-	Path = require('./Path'),
-	BinaryTree = require('./BinaryTree');
+var Shared = require("./Shared"),
+	Path = require("./Path"),
+	BinaryTree = require("./BinaryTree");
 
 /**
  * The index class used to instantiate btree indexes that the database can
@@ -48,9 +48,9 @@ IndexBinaryTree.prototype.init = function (keys, options, collection) {
 	this._btree.debug(this._debug);
 };
 
-Shared.addModule('IndexBinaryTree', IndexBinaryTree);
-Shared.mixin(IndexBinaryTree.prototype, 'Mixin.ChainReactor');
-Shared.mixin(IndexBinaryTree.prototype, 'Mixin.Sorting');
+Shared.addModule("IndexBinaryTree", IndexBinaryTree);
+Shared.mixin(IndexBinaryTree.prototype, "Mixin.ChainReactor");
+Shared.mixin(IndexBinaryTree.prototype, "Mixin.Sorting");
 
 IndexBinaryTree.prototype.id = function () {
 	return this._id;
@@ -64,11 +64,11 @@ IndexBinaryTree.prototype.size = function () {
 	return this._size;
 };
 
-Shared.synthesize(IndexBinaryTree.prototype, 'data');
-Shared.synthesize(IndexBinaryTree.prototype, 'name');
-Shared.synthesize(IndexBinaryTree.prototype, 'collection');
-Shared.synthesize(IndexBinaryTree.prototype, 'type');
-Shared.synthesize(IndexBinaryTree.prototype, 'unique');
+Shared.synthesize(IndexBinaryTree.prototype, "data");
+Shared.synthesize(IndexBinaryTree.prototype, "name");
+Shared.synthesize(IndexBinaryTree.prototype, "collection");
+Shared.synthesize(IndexBinaryTree.prototype, "type");
+Shared.synthesize(IndexBinaryTree.prototype, "unique");
 
 IndexBinaryTree.prototype.keys = function (val) {
 	if (val !== undefined) {
@@ -87,8 +87,8 @@ IndexBinaryTree.prototype.rebuild = function () {
 	if (this._collection) {
 		// Get sorted data
 		var collection = this._collection.subset({}, {
-				$decouple: false,
-				$orderBy: this._keys
+				"$decouple": false,
+				"$orderBy": this._keys
 			}),
 			collectionData = collection.find(),
 			dataIndex,
@@ -109,12 +109,12 @@ IndexBinaryTree.prototype.rebuild = function () {
 	}
 
 	this._state = {
-		name: this._name,
-		keys: this._keys,
-		indexSize: this._size,
-		built: new Date(),
-		updated: new Date(),
-		ok: true
+		"name": this._name,
+		"keys": this._keys,
+		"indexSize": this._size,
+		"built": new Date(),
+		"updated": new Date(),
+		"ok": true
 	};
 };
 
@@ -178,14 +178,14 @@ IndexBinaryTree.prototype.match = function (query, options) {
 IndexBinaryTree.prototype._itemHash = function (item, keys) {
 	var path = new Path(),
 		pathData,
-		hash = '',
+		hash = "",
 		k;
 
 	pathData = path.parse(keys);
 
 	for (k = 0; k < pathData.length; k++) {
-		if (hash) { hash += '_'; }
-		hash += path.value(item, pathData[k].path).join(':');
+		if (hash) { hash += "_"; }
+		hash += path.value(item, pathData[k].path).join(":");
 	}
 
 	return hash;
@@ -194,13 +194,13 @@ IndexBinaryTree.prototype._itemHash = function (item, keys) {
 IndexBinaryTree.prototype._itemKeyHash = function (item, keys) {
 	var path = new Path(),
 		pathData,
-		hash = '',
+		hash = "",
 		k;
 
 	pathData = path.parse(keys);
 
 	for (k = 0; k < pathData.length; k++) {
-		if (hash) { hash += '_'; }
+		if (hash) { hash += "_"; }
 		hash += path.keyValue(item, pathData[k].path);
 	}
 
@@ -227,7 +227,7 @@ IndexBinaryTree.prototype._itemHashArr = function (item, keys) {
 			} else {
 				// Loop the hash array and concat the value to it
 				for (j = 0; j < hashArr.length; j++) {
-					hashArr[j] = hashArr[j] + '_' + valArr[i];
+					hashArr[j] = hashArr[j] + "_" + valArr[i];
 				}
 			}
 		}
@@ -239,5 +239,5 @@ IndexBinaryTree.prototype._itemHashArr = function (item, keys) {
 // Register this index on the shared object
 Shared.index.btree = IndexBinaryTree;
 
-Shared.finishModule('IndexBinaryTree');
+Shared.finishModule("IndexBinaryTree");
 module.exports = IndexBinaryTree;
