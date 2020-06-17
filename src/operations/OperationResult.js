@@ -75,6 +75,20 @@ class OperationResult extends CoreClass {
 		this.success.push(success);
 		return this;
 	}
+
+	/**
+	 * Removes all success results from the operation.
+	 */
+	clearSuccess () {
+		this.success = [];
+	}
+
+	/**
+	 * Removes all failure results from the operation.
+	 */
+	clearFailure () {
+		this.failure = [];
+	}
 }
 
 export default OperationResult;
