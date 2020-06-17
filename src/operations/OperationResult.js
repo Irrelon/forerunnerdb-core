@@ -5,7 +5,9 @@ import OperationSuccess from "./OperationSuccess";
 class OperationResult extends CoreClass {
 	constructor (data = {}) {
 		super();
-		
+
+		this.resultCode = null;
+		this.resultData = null;
 		this.failure = [];
 		this.success = [];
 		
