@@ -12,6 +12,14 @@ import OperationFailure from "../operations/OperationFailure";
  * previous work will remain in place.
  */
 
+/**
+ * @callback StepFunction
+ * @param {*} data The data the function is given by the pipeline.
+ * @param {*} originalData The value of the data before any pipeline steps
+ * changed it. This will always be the value that `data` was before it got
+ * changed.
+ */
+
 class Pipeline extends CoreClass {
 	constructor () {
 		super();
@@ -21,19 +29,22 @@ class Pipeline extends CoreClass {
 	/**
 	 * Add a step to the pipeline.
 	 * @param {String} name The unique name of the step.
-	 * @param {Function} func The function to run when the step is executed.
-	 * @param {ExecuteOptions} options An options object.
+	 * @param {StepFunction} func The function to run when the step is executed.
+	 * @param {ExecuteOptions} [options] An options object.
 	 * @returns {Boolean} True if the step was added, false if a step of
 	 * that name already exists.
 	 */
 	addStep (name, func, options) {
+		if (this._steps.get(name)) return false;
+		
 		this._steps.set(name, {name, func, options});
+		return true;
 	}
 	
 	/**
 	 * Removes a step from the pipeline by name.
 	 * @param {String} name The name of the step to remove.
-	 * @returns {undefined} Nothing.
+	 * @returns {void} Nothing.
 	 */
 	removeStep (name) {
 		this._steps.delete(name);
@@ -47,7 +58,7 @@ class Pipeline extends CoreClass {
 	 * pipeline. This is different from `data` in that `data` can be
 	 * updated by a pipeline step whereas `originalData` remains the
 	 * value that `data` was originally before the pipeline was executed.
-	 * @returns {OperationResult} The result of the operation.
+	 * @returns {OperationSuccess|OperationFailure} The result of the operation.
 	 */
 	executeStep (name, data, originalData) {
 		const step = this._steps.get(name);
