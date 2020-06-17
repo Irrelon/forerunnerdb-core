@@ -19,6 +19,8 @@ import {
  * being updated and the result of the update and if the $postFlight function
  * returns true, we will continue but if it returns false we will cancel the
  * update.
+ * @property {Function} [$assignment] If passed, overrides the function that
+ * would normally push the final data to the `dataArr` argument.
  */
 
 /**
@@ -45,6 +47,10 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 	
 	const preFlightArr = [];
 	const postFlightArr = [];
+	
+	const assignmentFunc = options.$assignment || ((...args) => {
+		dataArr.push(...args);
+	});
 	
 	if (options.$preFlight) {
 		preFlightArr.push(options.$preFlight);
@@ -88,8 +94,7 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 	}
 	
 	if (!options.$skipAssignment && inserted.length) {
-		// Update the document array
-		dataArr.push(...inserted);
+		assignmentFunc(...inserted);
 	}
 	
 	return {
