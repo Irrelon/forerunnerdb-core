@@ -18,18 +18,41 @@ class Pipeline extends CoreClass {
 		this._steps = new Map();
 	}
 	
+	/**
+	 * Add a step to the pipeline.
+	 * @param {String} name The unique name of the step.
+	 * @param {Function} func The function to run when the step is executed.
+	 * @param {ExecuteOptions} options An options object.
+	 * @returns {Boolean} True if the step was added, false if a step of
+	 * that name already exists.
+	 */
 	addStep (name, func, options) {
 		this._steps.set(name, {name, func, options});
 	}
-
+	
+	/**
+	 * Removes a step from the pipeline by name.
+	 * @param {String} name The name of the step to remove.
+	 * @returns {undefined} Nothing.
+	 */
 	removeStep (name) {
 		this._steps.delete(name);
 	}
-
+	
+	/**
+	 * Execute the pipeline steps with the passed data.
+	 * @param {String} name The name of the step to execute.
+	 * @param {Object} [data] The data to pass to the pipeline.
+	 * @param {Object} [originalData] The original data passed to the
+	 * pipeline. This is different from `data` in that `data` can be
+	 * updated by a pipeline step whereas `originalData` remains the
+	 * value that `data` was originally before the pipeline was executed.
+	 * @returns {OperationResult} The result of the operation.
+	 */
 	executeStep (name, data, originalData) {
 		const step = this._steps.get(name);
 		if (!step) throw new Error(`No step with the name "${name}" exists!`);
-		console.log(`Executing step: ${name}`);
+		
 		const stepResult = step.func(data, originalData);
 
 		// Check the result conforms with our expected output
@@ -44,17 +67,17 @@ class Pipeline extends CoreClass {
 	 * Execute the pipeline steps with the passed data.
 	 * @param {Object} [data] The data to pass to the pipeline.
 	 * @param {ExecuteOptions} options An options object.
-	 * @returns {OperationResult}
+	 * @returns {OperationResult} The result of the operation.
 	 */
-	execute (data, options = {$atomic: false, $ordered: false}) {
+	execute (data, options = {"$atomic": false, "$ordered": false}) {
 		const operationResult = new OperationResult();
 		const originalData = data;
 		const steps = this._steps.keys();
 
 		let iteratorResult;
 		let currentStepData = data;
-		console.log(`Executing pipeline...`);
-		while (iteratorResult = steps.next()) {
+		
+		while ((iteratorResult = steps.next())) {
 			if (iteratorResult.done) {
 				break;
 			}
