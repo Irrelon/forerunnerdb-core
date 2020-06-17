@@ -1,7 +1,5 @@
 import assert from "assert";
 import Collection from "./Collection";
-import OperationSuccess from "../operations/OperationSuccess";
-import OperationFailure from "../operations/OperationFailure";
 
 describe("Collection", () => {
 	describe("operation()", () => {
@@ -13,7 +11,7 @@ describe("Collection", () => {
 				}, coll.indexViolationCheck);
 				
 				assert.strictEqual(result.success.length, 1, "Correct");
-				assert.strictEqual(result.success[0].type, OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS, "Correct");
+				assert.strictEqual(result.success[0].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
 			});
 			
 			it("Can run multiple operations and provide the correct result", () => {
@@ -25,8 +23,8 @@ describe("Collection", () => {
 				}], coll.indexViolationCheck);
 				
 				assert.strictEqual(result.success.length, 2, "Correct");
-				assert.strictEqual(result.success[0].type, OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS, "Correct");
-				assert.strictEqual(result.success[1].type, OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS, "Correct");
+				assert.strictEqual(result.success[0].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
+				assert.strictEqual(result.success[1].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
 			});
 		});
 		
@@ -43,7 +41,7 @@ describe("Collection", () => {
 				
 				assert.strictEqual(result.success.length, 0, "Correct");
 				assert.strictEqual(result.failure.length, 1, "Correct");
-				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Correct");
+				assert.strictEqual(result.failure[0].type, "INDEX_VIOLATION", "Correct");
 			});
 			
 			it("Can run multiple operations and provide the correct result", async () => {
@@ -59,8 +57,8 @@ describe("Collection", () => {
 				
 				assert.strictEqual(result.success.length, 1, "Correct");
 				assert.strictEqual(result.failure.length, 1, "Correct");
-				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Correct");
-				assert.strictEqual(result.success[0].type, OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS, "Correct");
+				assert.strictEqual(result.failure[0].type, "INDEX_VIOLATION", "Correct");
+				assert.strictEqual(result.success[0].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
 			});
 		});
 	});
@@ -110,7 +108,7 @@ describe("Collection", () => {
 			assert.strictEqual(result.nInserted, 1, "Number of inserted documents is correct");
 			assert.strictEqual(result.nFailed, 1, "Number of failed documents is correct");
 			assert.strictEqual(result.stage.postflight.failure.length, 1, "Number of failed documents is correct");
-			assert.strictEqual(result.stage.postflight.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Error code is correct");
+			assert.strictEqual(result.stage.postflight.failure[0].type, "INDEX_VIOLATION", "Error code is correct");
 		});
 		
 		it("Can insert an array of documents unordered and fail correctly", async () => {
@@ -125,7 +123,7 @@ describe("Collection", () => {
 			assert.strictEqual(result.nInserted, 2, "Number of inserted documents is correct");
 			assert.strictEqual(result.nFailed, 2, "Number of failed documents is correct");
 			assert.strictEqual(result.stage.postflight.failure.length, 2, "Number of failed documents is correct");
-			assert.strictEqual(result.stage.postflight.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Error code is correct");
+			assert.strictEqual(result.stage.postflight.failure[0].type, "INDEX_VIOLATION", "Error code is correct");
 		});
 	});
 	

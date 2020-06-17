@@ -92,7 +92,7 @@ class Collection extends CoreClass {
 			// Check if the index has a unique flag, if not it cannot violate
 			// so early exit
 			if (!indexObj.index.isUnique()) return new OperationSuccess({
-				"type": OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS,
+				"type": "INDEX_PREFLIGHT_SUCCESS",
 				"meta": {
 					"indexName": indexObj.name,
 					doc
@@ -104,7 +104,7 @@ class Collection extends CoreClass {
 			
 			if (wouldBeViolated) {
 				return new OperationFailure({
-					"type": OperationFailure.constants.INDEX_VIOLATION,
+					"type": "INDEX_VIOLATION",
 					"meta": {
 						"indexName": indexObj.name,
 						hash,
@@ -117,7 +117,7 @@ class Collection extends CoreClass {
 				}
 				
 				return new OperationSuccess({
-					"type": OperationSuccess.constants.INDEX_PREFLIGHT_SUCCESS,
+					"type": "INDEX_PREFLIGHT_SUCCESS",
 					"meta": {
 						"indexName": indexObj.name,
 						hash,
