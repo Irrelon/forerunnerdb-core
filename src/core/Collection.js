@@ -7,6 +7,7 @@ import OperationFailure from "../operations/OperationFailure";
 import OperationSuccess from "../operations/OperationSuccess";
 import find from "./operation/find";
 import update from "./operation/update";
+import insert from "./operation/insert";
 
 /**
  * @typedef {Object} InsertOptions
@@ -25,8 +26,8 @@ import update from "./operation/update";
  * @property {Boolean} operation.isOrdered True if the operation is ordered.
  * @property {Object|Array} operation.data The data passed to the operation.
  * @property {Object} [stage] Describes the stages the operation took.
- * @property {Object} [state.preflight] Any preflight stage information.
- * @property {Object} [state.postflight] Any postflight stage information.
+ * @property {Object} [state.preFlight] Any preFlight stage information.
+ * @property {Object} [state.postFlight] Any postFlight stage information.
  * @property {Object} [state.execute] Any execute stage information.
  * @property {Number} nInserted The number of documents inserted.
  * @property {Number} nFailed The number of documents that failed to insert.
@@ -188,27 +189,17 @@ class Collection extends CoreClass {
 	}
 	
 	pushData = (doc) => {
-		const finalDoc = this.ensurePrimaryKey(doc);
-		
-		if (this._indexInsert(finalDoc)) {
-			this._data.push(finalDoc);
-			return new OperationSuccess({"type": OperationSuccess.constants.INSERT_SUCCESS, "meta": {
-				"doc": finalDoc
-			}});
-		} else {
-			return new OperationFailure({"type": OperationFailure.constants.INSERT_FAILURE, "meta": {
-				"doc": finalDoc
-			}});
-		}
+		this._indexInsert(doc);
+		this._data.push(doc);
 	};
 
 	/**
 	 * Insert a document or array of documents into the collection.
 	 * @param {Object|Array} data The document or array of documents to insert.
 	 * @param {InsertOptions} [options={$atomic: false, $ordered: false}] Options object.
-	 * @returns {InsertResult} The result of the insert operation.
+	 * @returns {Promise<InsertResult>} The result of the insert operation.
 	 */
-	insert (data, options = {"$atomic": false, "$ordered": false}) {
+	async insert (data, options = {"$atomic": false, "$ordered": false}) {
 		const isArray = Array.isArray(data);
 		const isAtomic = options.$atomic === true;
 		const isOrdered = options.$ordered === true;
@@ -221,8 +212,8 @@ class Collection extends CoreClass {
 				data
 			},
 			"stage": {
-				"preflight": {},
-				"postflight": {},
+				"preFlight": {},
+				"postFlight": {},
 				"execute": {}
 			},
 			"nInserted": 0,
@@ -261,10 +252,32 @@ class Collection extends CoreClass {
 			insertResult.nInserted = result.success.length;
 		}
 		
+		const opResult = await insert(this._data, data, {
+			"$atomic": isAtomic,
+			"$ordered": isOrdered,
+			"$preFlight": (doc) => {
+				const finalDoc = this.ensurePrimaryKey(doc);
+				const indexViolationCheckResult = this.indexViolationCheck(finalDoc);
+				
+				return true;
+			},
+			"$assignment": (...args) => {
+				args.forEach((doc) => this.pushData(doc));
+			},
+			"$skipAssignment": false
+		});
+		
+		insertResult.stage.preFlight.success = opResult.inserted;
+		insertResult.stage.preFlight.failure = opResult.notInserted;
+		
+		insertResult.nInserted = insertResult.stage.preFlight.success.length;
+		insertResult.nFailed = insertResult.stage.preFlight.failure.length;
+		
 		// Check capped collection status and remove first record
 		// if we are over the threshold
 		if (this._cap && this._data.length > this._cap) {
 			// Remove the first item in the data array
+			// TODO this assumes a single insert, modify to handle multiple docs inserted at once
 			this.removeById(pathGet(this._data[0], this._primaryKey));
 		}
 		

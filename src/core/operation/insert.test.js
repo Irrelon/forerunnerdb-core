@@ -79,9 +79,7 @@ describe("insert", () => {
 		});
 
 		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
-		assert.notStrictEqual(dataArr, insertResult, "Data has been immutably updated");
-		assert.notStrictEqual(dataArr[0], insertResult[0], "Data has been immutably updated");
+		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
 			"foo": true
@@ -118,7 +116,7 @@ describe("insert", () => {
 
 		assert.strictEqual(insertResult.inserted.length, 0, "Number of documents is correct");
 		assert.strictEqual(insertResult.notInserted.length, 1, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		assert.strictEqual(dataArr[0]._id, "1", "Value is correct");
 		assert.strictEqual(dataArr[0].foo, true, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
@@ -141,11 +139,11 @@ describe("insert", () => {
 		
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		
-		const insertResult = await insert(dataArr, {
+		const insertResult = await insert(dataArr, [{
 			"_id": "3",
 			"foo": false,
 			"newVal": "bar"
-		}, {
+		}], {
 			"$preFlight": (doc) => {
 				return doc._id === "3";
 			}
@@ -158,11 +156,14 @@ describe("insert", () => {
 		assert.strictEqual(dataArr[2].foo, false, "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
-			"foo": false,
-			"newVal": "bar"
+			"foo": true
 		}, {
 			"_id": "2",
 			"foo": true
+		}, {
+			"_id": "3",
+			"foo": false,
+			"newVal": "bar"
 		}], "Correct value");
 	});
 	
@@ -177,10 +178,10 @@ describe("insert", () => {
 		
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		
-		const insertResult = await insert(dataArr, {
+		const insertResult = await insert(dataArr, [{
 			"foo": false,
 			"newVal": "bar"
-		}, {
+		}], {
 			"$preFlight": (doc) => {
 				return doc._id === "1";
 			},
@@ -214,30 +215,35 @@ describe("insert", () => {
 		
 		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
 		
-		const insertResult = await insert(dataArr, {
+		const insertResult = await insert(dataArr, [{
+			"_id": "3",
 			"foo": false,
 			"newVal": "bar"
-		}, {
+		}], {
 			"$preFlight": (doc) => {
-				return doc._id === "1";
+				return doc._id === "3";
 			},
 			"$postFlight": (updatedDoc, originalDoc) => {
-				return updatedDoc._id === "1";
+				return updatedDoc._id === "3";
 			}
 		});
 
 		assert.strictEqual(insertResult.inserted.length, 1, "Number of documents is correct");
 		assert.strictEqual(insertResult.notInserted.length, 0, "Number of documents is correct");
-		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
-		assert.strictEqual(dataArr[0]._id, "1", "Value is correct");
-		assert.strictEqual(dataArr[0].foo, false, "Value is correct");
+		assert.strictEqual(dataArr.length, 3, "Number of documents is correct");
+		assert.strictEqual(dataArr[2]._id, "3", "Value is correct");
+		assert.strictEqual(dataArr[2].foo, false, "Value is correct");
+		assert.strictEqual(dataArr[2].newVal, "bar", "Value is correct");
 		assert.deepStrictEqual(dataArr, [{
 			"_id": "1",
-			"foo": false,
-			"newVal": "bar"
+			"foo": true
 		}, {
 			"_id": "2",
 			"foo": true
+		}, {
+			"_id": "3",
+			"foo": false,
+			"newVal": "bar"
 		}], "Correct value");
 	});
 });

@@ -1,4 +1,3 @@
-import {pushVal as pathPushVal} from "@irrelon/path";
 import {
 	testFlight,
 	EnumTestFlightResult
@@ -20,6 +19,8 @@ import {
  * being updated and the result of the update and if the $postFlight function
  * returns true, we will continue but if it returns false we will cancel the
  * update.
+ * @property {Function} [$assignment] If passed, overrides the function that
+ * would normally push the final data to the `dataArr` argument.
  */
 
 /**
@@ -37,11 +38,19 @@ import {
  * @returns {Promise<InsertResult>} The result of the insert operation.
  */
 export const insert = async (dataArr, insertArr, options = {}) => {
+	if (!Array.isArray(insertArr)) {
+		insertArr = [insertArr];
+	}
+	
 	const inserted = [];
 	const notInserted = [];
 	
 	const preFlightArr = [];
 	const postFlightArr = [];
+	
+	const assignmentFunc = options.$assignment || ((...args) => {
+		dataArr.push(...args);
+	});
 	
 	if (options.$preFlight) {
 		preFlightArr.push(options.$preFlight);
@@ -84,9 +93,8 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 		inserted.push(updatedDoc);
 	}
 	
-	if (!options.$skipAssignment) {
-		// Update the document array
-		dataArr.push(...inserted);
+	if (!options.$skipAssignment && inserted.length) {
+		assignmentFunc(...inserted);
 	}
 	
 	return {

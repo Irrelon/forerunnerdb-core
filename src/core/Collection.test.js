@@ -31,9 +31,9 @@ describe("Collection", () => {
 		});
 		
 		describe("Negative Path", () => {
-			it("Can run an operation and provide the correct result", () => {
+			it("Can run an operation and provide the correct result", async () => {
 				const coll = new Collection();
-				coll.insert({
+				await coll.insert({
 					"_id": "1"
 				});
 				
@@ -46,9 +46,9 @@ describe("Collection", () => {
 				assert.strictEqual(result.failure[0].type, OperationFailure.constants.INDEX_VIOLATION, "Correct");
 			});
 			
-			it("Can run multiple operations and provide the correct result", () => {
+			it("Can run multiple operations and provide the correct result", async () => {
 				const coll = new Collection();
-				coll.insert({
+				await coll.insert({
 					"_id": "1"
 				});
 				const result = coll.operation([{

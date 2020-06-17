@@ -41,6 +41,7 @@
 		"eslint": "eslint ./src",
 		"eslint-fix": "eslint --fix ./src",
 		"test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js",
+		"test-insert": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/core/operation/insert.test.js",
 		"testMon": "nodemon --watch src --exec \"NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js\""
 	},
 	"repository": {
