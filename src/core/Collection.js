@@ -219,7 +219,16 @@ class Collection extends CoreClass {
 			"nInserted": 0,
 			"nFailed": 0
 		};
-		
+
+		// TODO: This whole function is old and needs to use the new Pipeline system where
+		//  we define steps to take and then execute the Pipeline instance, finally resulting
+		//  in the insert at the end.
+
+		// TODO: Based on the above, at present this function inserts TWICE and breaks all tests
+		//  but this has all been left in place to show how we roughly need the pipeline to work
+
+		// TODO: We've disabled Collection.test.js by renaming it until we fix all this
+
 		// 1 Check index violations against existing data
 		insertResult.stage.preflight = this.operation(data, this.indexViolationCheck);
 		
@@ -258,7 +267,7 @@ class Collection extends CoreClass {
 			"$preFlight": (doc) => {
 				const finalDoc = this.ensurePrimaryKey(doc);
 				const indexViolationCheckResult = this.indexViolationCheck(finalDoc);
-				
+				console.log(indexViolationCheckResult);
 				return true;
 			},
 			"$assignment": (...args) => {

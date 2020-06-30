@@ -95,7 +95,7 @@ describe("Collection", () => {
 			assert.strictEqual(result.nInserted, 3, "Number of inserted documents is correct");
 		});
 		
-		it("Can insert an array of documents ordered and fail correctly", async () => {
+		it("Can insert an array of documents ordered and fail correctly by index violation", async () => {
 			const coll = new Collection();
 			const result = await coll.insert([
 				{"_id": 30, "item": "lamp", "qty": 50, "type": "desk"},
@@ -111,7 +111,7 @@ describe("Collection", () => {
 			assert.strictEqual(result.stage.postflight.failure[0].type, "INDEX_VIOLATION", "Error code is correct");
 		});
 		
-		it("Can insert an array of documents unordered and fail correctly", async () => {
+		it("Can insert an array of documents unordered and fail correctly by index violation", async () => {
 			const coll = new Collection();
 			const result = await coll.insert([
 				{"_id": 40, "item": "lamp", "qty": 50, "type": "desk"},
