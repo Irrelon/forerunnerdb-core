@@ -8,9 +8,22 @@ describe("find()", () => {
 			const query = {
 				"_id": 1
 			};
-			
+
 			const result = find(data, query);
-			
+
+			assert.strictEqual(result.length, 1, "Number of results is correct");
+			assert.strictEqual(result[0]._id, 1, "ID is correct");
+		});
+
+		it("$eeq explicit", () => {
+			const query = {
+				"_id": {
+					"$eeq": 1
+				}
+			};
+
+			const result = find(data, query);
+
 			assert.strictEqual(result.length, 1, "Number of results is correct");
 			assert.strictEqual(result[0]._id, 1, "ID is correct");
 		});
@@ -147,7 +160,6 @@ describe("find()", () => {
 			assert.strictEqual(result[1]._id, 3, "ID is correct");
 			assert.strictEqual(result[2]._id, 4, "ID is correct");
 			assert.strictEqual(result[3]._id, 5, "ID is correct");
-			
 		});
 	});
 });
