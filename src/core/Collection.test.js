@@ -11,7 +11,7 @@ describe("Collection", () => {
 				}, coll.indexViolationCheck);
 				
 				assert.strictEqual(result.success.length, 1, "Correct");
-				assert.strictEqual(result.success[0].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
+				assert.strictEqual(result.success[0].type, "INDEX_VIOLATION_CHECK_SUCCESS", "Correct");
 			});
 			
 			it("Can run multiple operations and provide the correct result", () => {
@@ -23,8 +23,8 @@ describe("Collection", () => {
 				}], coll.indexViolationCheck);
 				
 				assert.strictEqual(result.success.length, 2, "Correct");
-				assert.strictEqual(result.success[0].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
-				assert.strictEqual(result.success[1].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
+				assert.strictEqual(result.success[0].type, "INDEX_VIOLATION_CHECK_SUCCESS", "Correct");
+				assert.strictEqual(result.success[1].type, "INDEX_VIOLATION_CHECK_SUCCESS", "Correct");
 			});
 		});
 		
@@ -41,7 +41,7 @@ describe("Collection", () => {
 				
 				assert.strictEqual(result.success.length, 0, "Correct");
 				assert.strictEqual(result.failure.length, 1, "Correct");
-				assert.strictEqual(result.failure[0].type, "INDEX_VIOLATION", "Correct");
+				assert.strictEqual(result.failure[0].type, "INDEX_VIOLATION_CHECK_FAILURE", "Correct");
 			});
 			
 			it("Can run multiple operations and provide the correct result", async () => {
@@ -57,8 +57,8 @@ describe("Collection", () => {
 				
 				assert.strictEqual(result.success.length, 1, "Correct");
 				assert.strictEqual(result.failure.length, 1, "Correct");
-				assert.strictEqual(result.failure[0].type, "INDEX_VIOLATION", "Correct");
-				assert.strictEqual(result.success[0].type, "INDEX_PREFLIGHT_SUCCESS", "Correct");
+				assert.strictEqual(result.failure[0].type, "INDEX_VIOLATION_CHECK_FAILURE", "Correct");
+				assert.strictEqual(result.success[0].type, "INDEX_VIOLATION_CHECK_SUCCESS", "Correct");
 			});
 		});
 	});
@@ -69,7 +69,7 @@ describe("Collection", () => {
 			const result = await coll.insert({
 				"foo": true
 			});
-			
+			//console.log(result);
 			assert.strictEqual(result.nInserted, 1, "Number of inserted documents is correct");
 		});
 		
@@ -107,8 +107,8 @@ describe("Collection", () => {
 			// second insert (which will fail) the operation should stop
 			assert.strictEqual(result.nInserted, 1, "Number of inserted documents is correct");
 			assert.strictEqual(result.nFailed, 1, "Number of failed documents is correct");
-			assert.strictEqual(result.stage.postflight.failure.length, 1, "Number of failed documents is correct");
-			assert.strictEqual(result.stage.postflight.failure[0].type, "INDEX_VIOLATION", "Error code is correct");
+			assert.strictEqual(result.failures.length, 1, "Number of failed documents is correct");
+			assert.strictEqual(result.failures[0].type, "INDEX_VIOLATION_CHECK_FAILURE", "Error code is correct");
 		});
 		
 		it("Can insert an array of documents unordered and fail correctly by index violation", async () => {
@@ -119,12 +119,28 @@ describe("Collection", () => {
 				{"_id": 42, "item": "bulk", "qty": 100},
 				{"_id": 40, "item": "lamp", "qty": 20, "type": "floor"}
 			], {"$ordered": false});
+
+			const findResult1 = await coll.find();
 			
 			assert.strictEqual(result.nInserted, 2, "Number of inserted documents is correct");
 			assert.strictEqual(result.nFailed, 2, "Number of failed documents is correct");
-			assert.strictEqual(result.stage.postflight.failure.length, 2, "Number of failed documents is correct");
-			assert.strictEqual(result.stage.postflight.failure[0].type, "INDEX_VIOLATION", "Error code is correct");
+			assert.strictEqual(result.failures.length, 2, "Number of failed documents is correct");
+			assert.strictEqual(result.failures[0].type, "INDEX_VIOLATION_CHECK_FAILURE", "Error code is correct");
+
+			assert.strictEqual(findResult1.length, 2, "Number of documents is correct");
+			assert.deepStrictEqual(findResult1, [{
+				"_id": 40,
+				"item": "lamp",
+				"qty": 50,
+				"type": "desk"
+			}, {
+				"_id": 42,
+				"item": "bulk",
+				"qty": 100
+			}], "Correct value");
 		});
+
+		// TODO: Add an atomic operation insert test
 	});
 	
 	describe("update()", () => {

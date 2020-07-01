@@ -7,7 +7,6 @@ import OperationFailure from "../operations/OperationFailure";
 import OperationSuccess from "../operations/OperationSuccess";
 import find from "./operation/find";
 import update from "./operation/update";
-import insert from "./operation/insert";
 
 /**
  * @typedef {Object} InsertOptions
@@ -25,12 +24,11 @@ import insert from "./operation/insert";
  * @property {Boolean} operation.isAtomic True if the operation is atomic.
  * @property {Boolean} operation.isOrdered True if the operation is ordered.
  * @property {Object|Array} operation.data The data passed to the operation.
- * @property {Object} [stage] Describes the stages the operation took.
- * @property {Object} [state.preFlight] Any preFlight stage information.
- * @property {Object} [state.postFlight] Any postFlight stage information.
- * @property {Object} [state.execute] Any execute stage information.
  * @property {Number} nInserted The number of documents inserted.
  * @property {Number} nFailed The number of documents that failed to insert.
+ * @property {Array<Object>} inserted Array of documents inserted.
+ * @property {Array<Object>} notInserted Array of documents that failed to insert.
+ * @property {Array<OperationFailure>} failures Array of failed operation results.
  */
 
 class Collection extends CoreClass {
@@ -76,8 +74,7 @@ class Collection extends CoreClass {
 	 * not violate any index constraints.
 	 * @param {Object} doc The document to check.
 	 * @param {Object} [options] An options object.
-	 * @returns {Array<OperationSuccess|OperationFailure>} An array of
-	 * operation results.
+	 * @returns {OperationSuccess|OperationFailure} An operation result.
 	 */
 	indexViolationCheck = (doc, options = {}) => {
 		let indexArray = this._index;
@@ -88,43 +85,32 @@ class Collection extends CoreClass {
 		
 		// Loop each index and ask it to check if this
 		// document violates any index constraints
-		return indexArray.map((indexObj) => {
+		for (let indexNum = 0; indexNum < indexArray.length; indexNum++) {
+			const indexObj = indexArray[indexNum];
+
 			// Check if the index has a unique flag, if not it cannot violate
 			// so early exit
-			if (!indexObj.index.isUnique()) return new OperationSuccess({
-				"type": "INDEX_PREFLIGHT_SUCCESS",
-				"meta": {
-					"indexName": indexObj.name,
-					doc
-				}
-			});
-			
+			if (!indexObj.index.isUnique()) continue;
+
 			const hash = indexObj.index.hash(doc);
 			const wouldBeViolated = indexObj.index.willViolateByHash(hash);
-			
+
 			if (wouldBeViolated) {
 				return new OperationFailure({
-					"type": "INDEX_VIOLATION",
+					"type": "INDEX_VIOLATION_CHECK_FAILURE",
 					"meta": {
+						"stage": "preFlight",
 						"indexName": indexObj.name,
-						hash,
-						doc
-					}
-				});
-			} else {
-				if (options.insert === true) {
-					indexObj.index.insert(doc);
-				}
-				
-				return new OperationSuccess({
-					"type": "INDEX_PREFLIGHT_SUCCESS",
-					"meta": {
-						"indexName": indexObj.name,
-						hash,
-						doc
-					}
+						hash
+					},
+					"data": doc
 				});
 			}
+		}
+
+		return new OperationSuccess({
+			"type": "INDEX_VIOLATION_CHECK_SUCCESS",
+			"data": doc
 		});
 	};
 	
@@ -193,16 +179,94 @@ class Collection extends CoreClass {
 		this._data.push(doc);
 	};
 
+	_insertUnordered = async (data) => {
+		const insertResult = {
+			"inserted": [],
+			"notInserted": [],
+			"failures": []
+		};
+
+		// Loop the array of data and fire off an insert operation for each
+		// document, collating the result of each insert into an insert result
+		const promiseArr = [];
+		data.forEach((doc) => promiseArr.push(this._insertDocument(doc)));
+
+		const promiseResultArr = await Promise.all(promiseArr);
+
+		promiseResultArr.forEach((result) => {
+			if (result instanceof OperationFailure) {
+				insertResult.failures.push(result);
+				insertResult.notInserted.push(result.data);
+
+				return;
+			}
+
+			insertResult.inserted.push(result.data);
+		});
+
+		return insertResult;
+	}
+
+	_insertOrdered = async (data) => {
+		const insertResult = {
+			"inserted": [],
+			"notInserted": [],
+			"failures": []
+		};
+
+		// Loop the array of data and fire off an insert operation for each
+		// document, collating the result of each insert into an insert result
+		for (let dataIndex = 0; dataIndex < data.length; dataIndex++) {
+			const insertDocumentResult = await this._insertDocument(data[dataIndex]);
+
+			if (insertDocumentResult instanceof OperationFailure) {
+				// This doc failed to insert, return operation result now
+				insertResult.notInserted.push(insertDocumentResult.data);
+				insertResult.failures.push(insertDocumentResult);
+
+				return insertResult;
+			}
+
+			insertResult.inserted.push(insertDocumentResult.data);
+		}
+
+		return insertResult;
+	}
+
+	_insertDocument = async (doc) => {
+		// 1. Ensure primary key
+		const newDoc = this.ensurePrimaryKey(doc);
+
+		// 2. Check for index violation
+		const indexViolationResult = this.indexViolationCheck(newDoc);
+		if (indexViolationResult instanceof OperationFailure) return indexViolationResult;
+
+		// 3. Insert into internal data array
+		this._data.push(newDoc);
+
+		// 4. Insert into indexes
+		this._indexInsert(newDoc);
+
+		return new OperationSuccess({
+			data: newDoc
+		});
+	}
+
 	/**
 	 * Insert a document or array of documents into the collection.
 	 * @param {Object|Array} data The document or array of documents to insert.
 	 * @param {InsertOptions} [options={$atomic: false, $ordered: false}] Options object.
 	 * @returns {Promise<InsertResult>} The result of the insert operation.
 	 */
-	async insert (data, options = {"$atomic": false, "$ordered": false}) {
+	insert = async (data, options = {"$atomic": false, "$ordered": false}) => {
 		const isArray = Array.isArray(data);
 		const isAtomic = options.$atomic === true;
 		const isOrdered = options.$ordered === true;
+
+		// Make sure the data is an array
+		if (!isArray) {
+			data = [data];
+		}
 		
 		const insertResult = {
 			"operation": {
@@ -211,76 +275,22 @@ class Collection extends CoreClass {
 				isOrdered,
 				data
 			},
-			"stage": {
-				"preFlight": {},
-				"postFlight": {},
-				"execute": {}
-			},
 			"nInserted": 0,
-			"nFailed": 0
+			"nFailed": 0,
+			"inserted": [],
+			"notInserted": [],
+			"failures": []
 		};
 
-		// TODO: This whole function is old and needs to use the new Pipeline system where
-		//  we define steps to take and then execute the Pipeline instance, finally resulting
-		//  in the insert at the end.
+		let insertOperationResult;
 
-		// TODO: Based on the above, at present this function inserts TWICE and breaks all tests
-		//  but this has all been left in place to show how we roughly need the pipeline to work
-
-		// TODO: We've disabled Collection.test.js by renaming it until we fix all this
-
-		// 1 Check index violations against existing data
-		insertResult.stage.preflight = this.operation(data, this.indexViolationCheck);
-		
-		// 2 Check for index violations against itself when inserted
-		insertResult.stage.postflight = this.operation(data, this.indexViolationCheck, {
-			"insert": true,
-			"breakOnFailure": isOrdered,
-			"indexArray": this._index.map((indexObj) => {
-				return {
-					...indexObj,
-					"index": indexObj.index.replicate()
-				};
-			})
-		});
-		
-		insertResult.nFailed = insertResult.stage.preflight.failure.length + insertResult.stage.postflight.failure.length;
-		
-		// 3 If anything will fail, check if we are running atomic and if so, exit with error
-		if (isAtomic && insertResult.nFailed) {
-			// Atomic operation and we failed at least one op, fail the whole op
-			return insertResult;
-		}
-		
-		// 4 If not atomic, run through only allowed operations and complete them
 		if (isOrdered) {
-			const result = this.operation(data, this.pushData, {"breakOnFailure": true});
-			insertResult.nInserted = result.success.length;
+			insertOperationResult = await this._insertOrdered(data);
+		} else if (isAtomic) {
+			insertOperationResult = await this._insertUnordered(data);
 		} else {
-			const result = this.operation(data, this.pushData, {"breakOnFailure": false});
-			insertResult.nInserted = result.success.length;
+			insertOperationResult = await this._insertUnordered(data);
 		}
-		
-		const opResult = await insert(this._data, data, {
-			"$atomic": isAtomic,
-			"$ordered": isOrdered,
-			"$preFlight": (doc) => {
-				const finalDoc = this.ensurePrimaryKey(doc);
-				const indexViolationCheckResult = this.indexViolationCheck(finalDoc);
-				console.log(indexViolationCheckResult);
-				return true;
-			},
-			"$assignment": (...args) => {
-				args.forEach((doc) => this.pushData(doc));
-			},
-			"$skipAssignment": false
-		});
-		
-		insertResult.stage.preFlight.success = opResult.inserted;
-		insertResult.stage.preFlight.failure = opResult.notInserted;
-		
-		insertResult.nInserted = insertResult.stage.preFlight.success.length;
-		insertResult.nFailed = insertResult.stage.preFlight.failure.length;
 		
 		// Check capped collection status and remove first record
 		// if we are over the threshold
@@ -291,7 +301,12 @@ class Collection extends CoreClass {
 		}
 		
 		// 5 Return result
-		return insertResult;
+		return {
+			...insertResult,
+			...insertOperationResult,
+			nInserted: insertOperationResult.inserted.length,
+			nFailed: insertOperationResult.notInserted.length,
+		};
 	}
 	
 	find (queryObj = {}, options = {}) {

@@ -58,13 +58,13 @@ class Pipeline extends CoreClass {
 	 * pipeline. This is different from `data` in that `data` can be
 	 * updated by a pipeline step whereas `originalData` remains the
 	 * value that `data` was originally before the pipeline was executed.
-	 * @returns {OperationSuccess|OperationFailure} The result of the operation.
+	 * @returns {Promise<OperationSuccess|OperationFailure>} The result of the operation.
 	 */
-	executeStep (name, data, originalData) {
+	executeStep = async (name, data, originalData) => {
 		const step = this._steps.get(name);
 		if (!step) throw new Error(`No step with the name "${name}" exists!`);
 		
-		const stepResult = step.func(data, originalData);
+		const stepResult = await step.func(data, originalData);
 
 		// Check the result conforms with our expected output
 		if (!(stepResult instanceof OperationSuccess || stepResult instanceof OperationFailure)) {
@@ -78,9 +78,9 @@ class Pipeline extends CoreClass {
 	 * Execute the pipeline steps with the passed data.
 	 * @param {Object} [data] The data to pass to the pipeline.
 	 * @param {ExecuteOptions} options An options object.
-	 * @returns {OperationResult} The result of the operation.
+	 * @returns {Promise<OperationResult>} The result of the operation.
 	 */
-	execute (data, options = {"$atomic": false, "$ordered": false}) {
+	execute = async (data, options = {"$atomic": false, "$ordered": false}) => {
 		const operationResult = new OperationResult();
 		const originalData = data;
 		const steps = this._steps.keys();
@@ -94,7 +94,7 @@ class Pipeline extends CoreClass {
 			}
 
 			const stepName = iteratorResult.value;
-			const stepResult = this.executeStep(stepName, currentStepData, originalData);
+			const stepResult = await this.executeStep(stepName, currentStepData, originalData);
 
 			// Check if we are atomic and have a failure
 			if (stepResult instanceof OperationFailure) {
@@ -117,8 +117,8 @@ class Pipeline extends CoreClass {
 
 			// Check if the result provided us with new data to pass to the
 			// next step in the pipeline
-			if (stepResult.returnData !== undefined) {
-				currentStepData = stepResult.returnData;
+			if (stepResult.data !== undefined) {
+				currentStepData = stepResult.data;
 			}
 		}
 

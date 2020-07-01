@@ -6,21 +6,21 @@ import CoreClass from "../core/CoreClass";
  * signalling failure context to downstream code.
  * @property {*} [meta] Any meta-data you wish to include with your
  * success response that may be useful somewhere downstream.
- * @property {*} [returnData] Any data you specifically intend to be
+ * @property {*} [data] Any data you specifically intend to be
  * returned by your operation for use by the calling function.
  */
 
 class OperationFailure extends CoreClass {
 	/**
 	 * Creates a new failure response to an operation.
-	 * @param {OperationFailureData} data The operation result.
+	 * @param {OperationFailureData} info The operation result.
 	 */
-	constructor (data) {
+	constructor (info) {
 		super();
 		
-		this.type = data.type|| "";
-		this.meta = data.meta;
-		this.returnData = data.returnData;
+		this.type = info.type || "";
+		this.meta = info.meta;
+		this.data = info.data;
 	}
 }
 

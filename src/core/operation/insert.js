@@ -48,7 +48,7 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 	const preFlightArr = [];
 	const postFlightArr = [];
 	
-	const assignmentFunc = options.$assignment || ((...args) => {
+	const assignmentFunc = options.$assignment || ((args) => {
 		dataArr.push(...args);
 	});
 	
@@ -61,6 +61,7 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 	}
 	
 	const executeFlight = (doc) => {
+		// Decouple outer object
 		return {...doc};
 	};
 	
@@ -94,7 +95,7 @@ export const insert = async (dataArr, insertArr, options = {}) => {
 	}
 	
 	if (!options.$skipAssignment && inserted.length) {
-		assignmentFunc(...inserted);
+		assignmentFunc(inserted);
 	}
 	
 	return {

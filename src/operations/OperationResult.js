@@ -89,6 +89,10 @@ class OperationResult extends CoreClass {
 	clearFailure () {
 		this.failure = [];
 	}
+
+	setResultData = (data) => {
+		this.resultData = data;
+	}
 }
 
 export default OperationResult;
