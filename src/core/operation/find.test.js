@@ -162,4 +162,59 @@ describe("find()", () => {
 			assert.strictEqual(result[3]._id, 5, "ID is correct");
 		});
 	});
+
+	describe("Arrays of objects", () => {
+		const arr = [
+			{
+				"address_id": "120167000000088001",
+				"attention": "Test New Address ATTN",
+				"address": "6 Moohove Drive",
+				"street2": "Winsoken",
+				"city": "Tailbeach",
+				"state": "Harpinshire",
+				"zip": "PE28 9QT",
+				"country": "United Kingdom",
+				"phone": "",
+				"fax": ""
+			},
+			{
+				"address_id": "120167000000088007",
+				"attention": "Bilbo Baggins",
+				"address": "1 The Shrire",
+				"street2": "Rolling Hills Road",
+				"city": "Shiretown",
+				"state": "Cambridgeshire",
+				"zip": "QT68 2ZZ",
+				"country": "United Kingdom",
+				"phone": "",
+				"fax": ""
+			}
+		];
+
+		const query = {
+			"attention": "Bilbo Baggins",
+			"address": "1 The Shrire",
+			"street2": "Rolling Hills Road",
+			"city": "Shiretown",
+			"state": "Cambridgeshire",
+			"zip": "QT68 2ZZ",
+			"country": "United Kingdom",
+			"phone": "",
+			"fax": ""
+		};
+
+		const result = find(arr, query);
+
+		assert.strictEqual(result.length, 1, "Number of results is correct");
+		assert.strictEqual(result[0].address_id, "120167000000088007", "ID is correct");
+		assert.strictEqual(result[0].attention, "Bilbo Baggins", "Details correct");
+		assert.strictEqual(result[0].address, "1 The Shrire", "Details correct");
+		assert.strictEqual(result[0].street2, "Rolling Hills Road", "Details correct");
+		assert.strictEqual(result[0].city, "Shiretown", "Details correct");
+		assert.strictEqual(result[0].state, "Cambridgeshire", "Details correct");
+		assert.strictEqual(result[0].zip, "QT68 2ZZ", "Details correct");
+		assert.strictEqual(result[0].country, "United Kingdom", "Details correct");
+		assert.strictEqual(result[0].phone, "", "Details correct");
+		assert.strictEqual(result[0].fax, "", "Details correct");
+	});
 });
