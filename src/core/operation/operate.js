@@ -1,4 +1,8 @@
-import {get as pathGet, setImmutable as pathSetImmutable} from "@irrelon/path";
+import {
+	get as pathGet,
+	setImmutable as pathSetImmutable,
+	match as pathMatch
+} from "@irrelon/path";
 
 export const operatePipeline = (pipeline, data, extraInfo = {"originalUpdate": {}}) => {
 	const opFunc = operationLookup[pipeline.op];
@@ -47,9 +51,68 @@ export const $push = (data, value, extraInfo = {}) => {
 	return [...data, value];
 };
 
+export const $pull = (data, value, extraInfo = {}) => {
+	let found = false;
+	return data.reduce((newArr, item) => {
+		if (!found && pathMatch(item, value)) {
+			found = true;
+		} else {
+			newArr.push(item);
+		}
+		
+		return newArr;
+	}, []);
+};
+
+export const $pullAll = (data, value, extraInfo = {}) => {
+	return data.reduce((newArr, item) => {
+		if (!pathMatch(item, value)) {
+			newArr.push(item);
+		}
+		
+		return newArr;
+	}, []);
+};
+
+export const $pop = (data, value, extraInfo = {}) => {
+	return data.slice(0, data.length - 1);
+};
+
+export const $shift = (data, value, extraInfo = {}) => {
+	const [, ...newArr] = data;
+	return newArr;
+};
+
 export const operationLookup = {
 	$replaceValue,
 	$updateReplaceMode,
 	$inc,
-	$push
+	$push,
+	$pull,
+	$pullAll,
+	$pop,
+	$shift
 };
+
+// TODO: Write
+/*
+$addToSet
+$cast
+$each
+$inc - DONE
+$move
+$mul
+$overwrite
+$push - DONE
+$pull - DONE
+$pullAll - DONE
+$pop - DONE
+$shift - DONE
+$rename
+$replace
+$splicePush
+$splicePull
+$toggle
+$unset
+Array Positional in Updates (.$)
+ */

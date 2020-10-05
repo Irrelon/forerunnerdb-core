@@ -1,4 +1,4 @@
-import {$inc, $push} from "./operate";
+import {$inc, $pop, $push, $shift} from "./operate";
 import assert from "assert";
 
 describe("operate", () => {
@@ -29,6 +29,38 @@ describe("operate", () => {
 				assert.deepStrictEqual(arr, [], "Correct");
 				assert.deepStrictEqual(result, [{"foo": true}], "Correct");
 			});
+		});
+	});
+	
+	describe("$pop", () => {
+		it("Pops the last array value", () => {
+			const arr = ["foo", "bar", 12];
+			const result = $pop(arr);
+			assert.deepStrictEqual(arr, ["foo", "bar", 12], "Correct");
+			assert.deepStrictEqual(result, ["foo", "bar"], "Correct");
+		});
+		
+		it("Returns a blank array when no items are present", () => {
+			const arr = [];
+			const result = $pop(arr);
+			assert.deepStrictEqual(arr, [], "Correct");
+			assert.deepStrictEqual(result, [], "Correct");
+		});
+	});
+	
+	describe("$shift", () => {
+		it("Removes the first array value", () => {
+			const arr = ["foo", "bar", 12];
+			const result = $shift(arr);
+			assert.deepStrictEqual(arr, ["foo", "bar", 12], "Correct");
+			assert.deepStrictEqual(result, ["bar", 12], "Correct");
+		});
+		
+		it("Returns a blank array when no items are present", () => {
+			const arr = [];
+			const result = $shift(arr);
+			assert.deepStrictEqual(arr, [], "Correct");
+			assert.deepStrictEqual(result, [], "Correct");
 		});
 	});
 });

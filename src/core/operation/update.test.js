@@ -351,5 +351,162 @@ describe("update", () => {
 				}], "Correct value");
 			});
 		});
+		
+		describe("$pull", () => {
+			it("Remove object from array", async () => {
+				const dataArr = [{
+					"_id": "1",
+					"data": [{"val": 1}, {"val": 12}, {"val": 24}]
+				}, {
+					"_id": "2",
+					"data": []
+				}];
+				
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				
+				const updateResult = await update(dataArr, {
+					"_id": "1"
+				}, {
+					"$pull": {
+						"data": {"val": 12}
+					}
+				});
+				
+				assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
+				assert.deepStrictEqual(dataArr, [{
+					"_id": "1",
+					"data": [{"val": 1}, {"val": 24}]
+				}, {
+					"_id": "2",
+					"data": []
+				}], "Correct value");
+			});
+			
+			it("Remove number from array", async () => {
+				const dataArr = [{
+					"_id": "1",
+					"data": [1, 12, 24]
+				}, {
+					"_id": "2",
+					"data": []
+				}];
+				
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				
+				const updateResult = await update(dataArr, {
+					"_id": "1"
+				}, {
+					"$pull": {
+						"data": 12
+					}
+				});
+				
+				assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				assert.deepStrictEqual(dataArr, [{
+					"_id": "1",
+					"data": [1, 24]
+				}, {
+					"_id": "2",
+					"data": []
+				}], "Correct value");
+			});
+			
+			it("Remove first string from array", async () => {
+				const dataArr = [{
+					"_id": "1",
+					"data": ["1", "12", "12", "24", 1, 12, true]
+				}, {
+					"_id": "2",
+					"data": []
+				}];
+				
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				
+				const updateResult = await update(dataArr, {
+					"_id": "1"
+				}, {
+					"$pull": {
+						"data": "12"
+					}
+				});
+				
+				assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				assert.deepStrictEqual(dataArr, [{
+					"_id": "1",
+					"data": ["1", "12", "24", 1, 12, true]
+				}, {
+					"_id": "2",
+					"data": []
+				}], "Correct value");
+			});
+			
+			it("Remove first object from array", async () => {
+				const dataArr = [{
+					"_id": "1",
+					"data": [{"val": {"calc": 1, "foo": false}}, {"val": {"calc": 12, "foo": true}}, {"val": {"calc": 24, "foo": "bar"}}]
+				}, {
+					"_id": "2",
+					"data": []
+				}];
+				
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				
+				const updateResult = await update(dataArr, {
+					"_id": "1"
+				}, {
+					"$pull": {
+						"data": {"val": {"calc": 12}}
+					}
+				});
+				
+				assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
+				assert.deepStrictEqual(dataArr, [{
+					"_id": "1",
+					"data": [{"val": {"calc": 1, "foo": false}}, {"val": {"calc": 24, "foo": "bar"}}]
+				}, {
+					"_id": "2",
+					"data": []
+				}], "Correct value");
+			});
+		});
+		
+		describe("$pop", () => {
+			it("Pops the first item from the end of the array", async () => {
+				const dataArr = [{
+					"_id": "1",
+					"data": [{"val": 1}, {"val": 12}, {"val": 24}]
+				}, {
+					"_id": "2",
+					"data": []
+				}];
+				
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				
+				const updateResult = await update(dataArr, {
+					"_id": "1"
+				}, {
+					"$pull": {
+						"data": {"val": 12}
+					}
+				});
+				
+				assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+				assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+				assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
+				assert.deepStrictEqual(dataArr, [{
+					"_id": "1",
+					"data": [{"val": 1}, {"val": 24}]
+				}, {
+					"_id": "2",
+					"data": []
+				}], "Correct value");
+			});
+		});
 	});
 });

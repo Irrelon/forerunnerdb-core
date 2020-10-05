@@ -210,27 +210,5 @@ export const operationLookup = {
 	$or,
 	// Update operations
 	$updateReplaceMode,
-	$updateSetMode,
+	$updateSetMode
 };
-
-// TODO: Write
-/*
-$addToSet
-$cast
-$each
-$inc - DONE
-$move
-$mul
-$overwrite
-$push - DONE
-$pull
-$pullAll
-$pop
-$rename
-$replace
-$splicePush
-$splicePull
-$toggle
-$unset
-Array Positional in Updates (.$)
- */
