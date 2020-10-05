@@ -14,17 +14,7 @@ export const queryFromObject = (obj) => {
  * @param {String} op The dollar op name e.g. "$eeq".
  * @returns {Object}
  */
-export const genericQueryOperation = (op = "") => (path, value, typeData) => {
-	return {
-		op,
-		"type": typeData.type,
-		"instance": typeData.instance,
-		path,
-		value
-	};
-};
-
-export const genericUpdateOperation = (op = "") => (path, value, typeData) => {
+export const genericOperation = (op = "", path, value, typeData) => {
 	return {
 		op,
 		"type": typeData.type,
@@ -35,22 +25,23 @@ export const genericUpdateOperation = (op = "") => (path, value, typeData) => {
 };
 
 // Query operations
-export const $eeq = genericQueryOperation("$eeq");
-export const $eq = genericQueryOperation("$eq");
-export const $lt = genericQueryOperation("$lt");
-export const $lte = genericQueryOperation("$lte");
-export const $gt = genericQueryOperation("$gt");
-export const $gte = genericQueryOperation("$gte");
-export const $in = genericQueryOperation("$in");
-export const $nin = genericQueryOperation("$nin");
-export const $ne = genericQueryOperation("$ne");
-export const $nee = genericQueryOperation("$nee");
-export const $fastIn = genericQueryOperation("$fastIn");
-export const $fastNin = genericQueryOperation("$fastNin");
+/*export const $eeq = genericOperation("$eeq");
+export const $eq = genericOperation("$eq");
+export const $lt = genericOperation("$lt");
+export const $lte = genericOperation("$lte");
+export const $gt = genericOperation("$gt");
+export const $gte = genericOperation("$gte");
+export const $in = genericOperation("$in");
+export const $nin = genericOperation("$nin");
+export const $ne = genericOperation("$ne");
+export const $nee = genericOperation("$nee");
+export const $fastIn = genericOperation("$fastIn");
+export const $fastNin = genericOperation("$fastNin");*/
 
 // Update operations
-export const $overwrite = genericUpdateOperation("$overwrite");
-export const $inc = genericUpdateOperation("$inc");
+/*export const $replaceValue = genericOperation("$replaceValue");
+export const $inc = genericOperation("$inc");
+export const $push = genericOperation("$push");*/
 
 export const objectToArray = (obj) => {
 	return Object.entries(obj).map(([key, val]) => {
@@ -72,7 +63,7 @@ export const reduceArray = (arr) => {
 	}, []);
 };
 
-export const gateOperation = (op) => (path, value) => {
+export const gateOperation = (op, pipelineGenerator) => (path, value) => {
 	const finalValue = (() => {
 		return value.reduce((itemArr, item) => {
 			if (!Array.isArray(item) && Object.keys(item).length > 1) {
@@ -80,10 +71,10 @@ export const gateOperation = (op) => (path, value) => {
 				// so split the object into an array of objects, each
 				// object containing one of the key/val pairs of the
 				// original `value` object
-				return itemArr.concat(reduceArray(objectToArray(item).map((item) => queryToPipeline(item, op, path))));
+				return itemArr.concat(reduceArray(objectToArray(item).map((item) => pipelineGenerator(item, op, path))));
 			}
 
-			return itemArr.concat(reduceArray(queryToPipeline(item, op, path)));
+			return itemArr.concat(reduceArray(pipelineGenerator(item, op, path)));
 		}, []);
 	})();
 
@@ -95,14 +86,6 @@ export const gateOperation = (op) => (path, value) => {
 		"value": finalValue
 	};
 };
-
-// Query gates
-export const $and = gateOperation("$and");
-export const $or = gateOperation("$or");
-
-// Update gates
-export const $set = gateOperation("$set");
-export const $replace = gateOperation("$replace");
 
 export const queryToPipeline = (query, currentGate = "", parentPath = "") => {
 	if (!currentGate) {
@@ -121,28 +104,24 @@ export const queryToPipeline = (query, currentGate = "", parentPath = "") => {
 
 		if (gateKey) {
 			return operationLookup[gateKey](parentPath, query[gateKey]);
-		} else {
-			// Implicit $and
-			return $and(parentPath, objectToArray(query));
 		}
+		
+		// Implicit $and
+		return $and(parentPath, objectToArray(query));
 	}
 	// ROB: When we call a gate operation we pass an empty path but it needs
 	// to be the path to the data - do a step through with the tests to see
 	// what's breaking... we're bringing match.js back up to speed after
 	// doing a fantastic job rationalising the queryToPipeline() call but it
 	// needs to handle paths correctly AND it needs to handle $in correctly...
-	// which I suspect means we need a new type of genericQueryOperation() like
+	// which I suspect means we need a new type of genericOperation() like
 	// genericArrayOperation() or whatever. X
 	return Object.entries(query).map(([path, value]) => {
 		const valTypeData = extendedType(value);
 
 		if (path.indexOf("$") === 0) {
 			// This is an operation
-			if (!operationLookup[path]) {
-				throw new Error(`Operation "${path}" not recognised`);
-			}
-
-			return operationLookup[path](parentPath, value, extendedType(value));
+			return genericOperation(path, parentPath, value, extendedType(value));
 		}
 
 		// The path is not an operation so check if it is holding a recursive
@@ -151,15 +130,15 @@ export const queryToPipeline = (query, currentGate = "", parentPath = "") => {
 			// Wrap this in an $and
 			if (currentGate !== "$and") {
 				return $and(pathJoin(parentPath, path), objectToArray(value));
-			} else {
-				// Merge our current data with the parent data
-				return objectToArray(value).map((item) => queryToPipeline(item, currentGate, path));
 			}
+			
+			// Merge our current data with the parent data
+			return objectToArray(value).map((item) => queryToPipeline(item, currentGate, path));
 		}
 
 		// The path is not an operation, the value is not recursive so
 		// we have an implicit $eeq
-		return $eeq(pathJoin(parentPath, path), value, extendedType(value));
+		return genericOperation("$eeq", pathJoin(parentPath, path), value, extendedType(value));
 	})[0];
 };
 
@@ -174,16 +153,16 @@ export const updateToPipeline = (query, currentGate = "", parentPath = "") => {
 
 		if (gateKey && queryKeyArr.length > 1) {
 			// This is an error. A query can either be fully gated
-			// or fully un-gated (implicit $replace) but not both
-			throw new Error("A query cannot contain both gated and un-gated field properties!");
+			// or fully un-gated (implicit $updateReplaceMode) but not both
+			throw new Error("An update cannot contain both gated and un-gated field properties!");
 		}
 
 		if (gateKey) {
 			return operationLookup[gateKey](parentPath, query[gateKey]);
-		} else {
-			// Implicit $replace
-			return $replace(parentPath, objectToArray(query));
 		}
+		
+		// Implicit $updateReplaceMode
+		return $updateReplaceMode(parentPath, objectToArray(query));
 	}
 
 	return Object.entries(query).map(([path, value]) => {
@@ -191,46 +170,67 @@ export const updateToPipeline = (query, currentGate = "", parentPath = "") => {
 
 		if (path.indexOf("$") === 0) {
 			// This is an operation
-			if (!operationLookup[path]) {
-				throw new Error(`Operation "${path}" not recognised`);
+			if (valTypeData.isFlat) {
+				return genericOperation(path, parentPath, value, extendedType(value));
 			}
-
-			return operationLookup[path](parentPath, value, extendedType(value));
+			
+			// Break each path into a separate operation
+			return Object.entries(value).map(([key, item]) => genericOperation(path, key, item, extendedType(item)));
 		}
 
 		// The path is not an operation so check if it is holding a recursive
 		// value or not
 		if (!valTypeData.isFlat) {
-			// Wrap this in a $replace
-			if (currentGate !== "$replace") {
-				return $replace(pathJoin(parentPath, path), objectToArray(value));
+			// Wrap this in a $updateReplaceMode
+			if (currentGate !== "$updateReplaceMode") {
+				return $updateReplaceMode(pathJoin(parentPath, path), objectToArray(value));
 			} else {
 				// Merge our current data with the parent data
-				return objectToArray(value).map((item) => queryToPipeline(item, currentGate, path));
+				return objectToArray(value).map((item) => updateToPipeline(item, currentGate, path));
 			}
 		}
 
 		// The path is not an operation, the value is not recursive so
-		// we have an implicit $eeq
-		return $overwrite(pathJoin(parentPath, path), value, extendedType(value));
+		// we have an implicit $replacePath
+		return genericOperation("$replaceValue", pathJoin(parentPath, path), value, extendedType(value));
 	})[0];
 };
 
+// Query gates
+export const $and = gateOperation("$and", queryToPipeline);
+export const $or = gateOperation("$or", queryToPipeline);
+
+// Update gates
+export const $updateSetMode = gateOperation("$updateSetMode", updateToPipeline);
+export const $updateReplaceMode = gateOperation("$updateReplaceMode", updateToPipeline);
+
 export const operationLookup = {
-	$eq,
-	$eeq,
-	$ne,
-	$nee,
-	$gt,
-	$gte,
-	$lt,
-	$lte,
+	// Query operations
 	$and,
 	$or,
-	$in,
-	$nin,
-	$fastIn,
-	$fastNin,
-	$set,
-	$inc
+	// Update operations
+	$updateReplaceMode,
+	$updateSetMode,
 };
+
+// TODO: Write
+/*
+$addToSet
+$cast
+$each
+$inc - DONE
+$move
+$mul
+$overwrite
+$push - DONE
+$pull
+$pullAll
+$pop
+$rename
+$replace
+$splicePush
+$splicePull
+$toggle
+$unset
+Array Positional in Updates (.$)
+ */

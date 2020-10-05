@@ -1,5 +1,5 @@
 import assert from "assert";
-import {$eeq, $eq, $in, queryFromObject, queryToPipeline, updateToPipeline} from "./build";
+import {genericOperation, queryFromObject, queryToPipeline, updateToPipeline} from "./build";
 import {extendedType} from "../../utils/type";
 
 describe("queryFromObject()", () => {
@@ -38,8 +38,8 @@ describe("queryFromObject()", () => {
 	});
 });
 
-describe("build", () => {
-	it("$eeq", () => {
+describe("genericOperation()", () => {
+	it("String data type", () => {
 		const data = {
 			"op": "$eeq",
 			"path": "bar.name",
@@ -56,12 +56,12 @@ describe("build", () => {
 			"instance": data.typeData.instance
 		};
 
-		const result = $eeq(data.path, data.value, data.typeData);
+		const result = genericOperation("$eeq", data.path, data.value, data.typeData);
 
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 
-	it("$eq", () => {
+	it("Array<String> data type", () => {
 		const data = {
 			"op": "$eq",
 			"path": "bar.name",
@@ -78,16 +78,16 @@ describe("build", () => {
 			"instance": data.typeData.instance
 		};
 
-		const result = $eq(data.path, data.value, data.typeData);
+		const result = genericOperation("$eq", data.path, data.value, data.typeData);
 
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 
-	it("$in", () => {
+	it("Array<Number> data type", () => {
 		const data = {
 			"op": "$in",
-			"path": "bar.name",
-			"value": ["Foo", "Bar"]
+			"path": "bar.val",
+			"value": [1, 24]
 		};
 
 		data.typeData = extendedType(data.value);
@@ -100,7 +100,7 @@ describe("build", () => {
 			"instance": data.typeData.instance
 		};
 
-		const result = $in(data.path, data.value, data.typeData);
+		const result = genericOperation("$in", data.path, data.value, data.typeData);
 
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
@@ -442,34 +442,135 @@ describe("queryToPipeline()", () => {
 
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
+});
 
-	it("Implicit $replace single tier, single-sub-operation with array value", () => {
+describe("updateToPipeline()", () => {
+	it("Implicit $updateReplaceMode single tier, single-sub-operation with array value", () => {
 		const update = {
 			"$inc": {
 				"bar.val": 1,
 				"bar.val2": 2
 			}
 		};
-
+		
 		const expected = {
 			"instance": "",
-			"op": "$replace",
+			"op": "$updateReplaceMode",
 			"path": "",
 			"type": "array",
 			"value": [{
-				"instance": "Object",
+				"instance": "",
 				"op": "$inc",
-				"path": "",
-				"type": "object",
-				"value": {
-					"bar.val": 1,
-					"bar.val2": 2
-				}
+				"path": "bar.val",
+				"type": "number",
+				"value": 1
+			}, {
+				"instance": "",
+				"op": "$inc",
+				"path": "bar.val2",
+				"type": "number",
+				"value": 2
 			}]
 		};
-
+		
 		const result = updateToPipeline(update);
-
+		
+		assert.deepStrictEqual(result, expected, "Correct");
+	});
+	
+	it("Implicit $updateReplaceMode single tier, multi-sub-operation with array value, implicit $replaceValue", () => {
+		const update = {
+			"$inc": {
+				"bar.val": 1,
+				"bar.val2": 2
+			},
+			"foo1": 1,
+			"foo2": 2
+		};
+		
+		const expected = {
+			"instance": "",
+			"op": "$updateReplaceMode",
+			"path": "",
+			"type": "array",
+			"value": [{
+				"instance": "",
+				"op": "$inc",
+				"path": "bar.val",
+				"type": "number",
+				"value": 1
+			}, {
+				"instance": "",
+				"op": "$inc",
+				"path": "bar.val2",
+				"type": "number",
+				"value": 2
+			}, {
+				"instance": "",
+				"op": "$replaceValue",
+				"path": "foo1",
+				"type": "number",
+				"value": 1
+			}, {
+				"instance": "",
+				"op": "$replaceValue",
+				"path": "foo2",
+				"type": "number",
+				"value": 2
+			}]
+		};
+		
+		const result = updateToPipeline(update);
+		
+		assert.deepStrictEqual(result, expected, "Correct");
+	});
+	
+	it("Implicit $updateReplaceMode single tier, multi-sub-operation with array value, explicit $replaceValue", () => {
+		const update = {
+			"$inc": {
+				"bar.val": 1,
+				"bar.val2": 2
+			},
+			"$replaceValue": {
+				"foo1": 1,
+				"foo2": 2
+			}
+		};
+		
+		const expected = {
+			"instance": "",
+			"op": "$updateReplaceMode",
+			"path": "",
+			"type": "array",
+			"value": [{
+				"instance": "",
+				"op": "$inc",
+				"path": "bar.val",
+				"type": "number",
+				"value": 1
+			}, {
+				"instance": "",
+				"op": "$inc",
+				"path": "bar.val2",
+				"type": "number",
+				"value": 2
+			}, {
+				"instance": "",
+				"op": "$replaceValue",
+				"path": "foo1",
+				"type": "number",
+				"value": 1
+			}, {
+				"instance": "",
+				"op": "$replaceValue",
+				"path": "foo2",
+				"type": "number",
+				"value": 2
+			}]
+		};
+		
+		const result = updateToPipeline(update);
+		
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 });

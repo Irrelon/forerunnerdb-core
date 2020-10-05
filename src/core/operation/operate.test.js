@@ -1,4 +1,4 @@
-import {$inc} from "./operate";
+import {$inc, $push} from "./operate";
 import assert from "assert";
 
 describe("operate", () => {
@@ -18,6 +18,17 @@ describe("operate", () => {
 				const result = $inc(new Date("2020-01-01T00:00:00Z"), new Date("2020-01-01T00:00:00Z"));
 				assert.strictEqual(result, true, "Correct");
 			});*/
+		});
+	});
+	
+	describe("$push", () => {
+		describe("Positive", () => {
+			it("Object", () => {
+				const arr = [];
+				const result = $push(arr, {"foo": true});
+				assert.deepStrictEqual(arr, [], "Correct");
+				assert.deepStrictEqual(result, [{"foo": true}], "Correct");
+			});
 		});
 	});
 });

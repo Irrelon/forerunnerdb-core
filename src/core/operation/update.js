@@ -59,9 +59,9 @@ export const update = async (dataArr, query, update = {}, options = {}) => {
 	const executeFlight = (originalDoc) => {
 		// Build an update object for this document
 		const updatePipeline = updateToPipeline(update);
-		debugger;
 		const updatedDoc = operatePipeline(updatePipeline, originalDoc, {"originalUpdate": update});
-		return pathUpdate(originalDoc, update, {
+		
+		return pathUpdate(originalDoc, updatedDoc, {
 			"immutable": true
 		});
 	};

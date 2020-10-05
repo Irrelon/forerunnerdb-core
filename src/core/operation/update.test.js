@@ -283,4 +283,35 @@ describe("update", () => {
 			"data": {"val": 12}
 		}], "Correct value");
 	});
+	
+	it("$push add item to array", async () => {
+		const dataArr = [{
+			"_id": "1",
+			"data": [{"val": 1}, {"val": 12}]
+		}, {
+			"_id": "2",
+			"data": []
+		}];
+		
+		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+		
+		const updateResult = await update(dataArr, {
+			"_id": "1"
+		}, {
+			"$push": {
+				"data": {"val": 24}
+			}
+		});
+		
+		assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+		assert.strictEqual(dataArr.length, 2, "Number of documents is correct");
+		assert.strictEqual(dataArr[0]._id, "1", "Number of documents is correct");
+		assert.deepStrictEqual(dataArr, [{
+			"_id": "1",
+			"data": [{"val": 1}, {"val": 12}, {"val": 24}]
+		}, {
+			"_id": "2",
+			"data": []
+		}], "Correct value");
+	});
 });

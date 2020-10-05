@@ -1,7 +1,6 @@
-import {get as pathGet} from "@irrelon/path";
+import {get as pathGet, setImmutable as pathSetImmutable} from "@irrelon/path";
 
 export const operatePipeline = (pipeline, data, extraInfo = {"originalUpdate": {}}) => {
-	debugger;
 	const opFunc = operationLookup[pipeline.op];
 
 	if (!opFunc) {
@@ -11,36 +10,24 @@ export const operatePipeline = (pipeline, data, extraInfo = {"originalUpdate": {
 	return opFunc(data, pipeline.value, {"originalUpdate": extraInfo.originalUpdate, "operation": pipeline});
 };
 
-export const $replace = (dataItem, opArr, extraInfo = {"originalQuery": {}}) => {
+export const $updateReplaceMode = (dataItem, opArr, extraInfo = {"originalQuery": {}}) => {
 	// Run through each operation and return a completely replaced
 	// data item based on data from the original
-	return opArr.forEach((opData) => {
-		let dataValue;
-		let opValue;
-		let opFunc;
-debugger;
-		dataValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
-		opFunc = operationLookup[opData.op];
-		opValue = opData.value;
-
-		// TODO:
-		//   Loop over each opValue and get the data so we can call $inc
-		//   as a pure function where the first param is the current data
-		//   and the second param is the new data. Then we take the result
-		//   and apply it back to the dataItem at this level. That way
-		//   the operation function (like $inc) doesn't need to know anything
-		//   about the structure of the dataItem etc, just pure maths.
-		//   Only question is will this work for other operations? How about
-		//   pushVal()? They need access to the array to push into. Investigate
-		//   further by getting at least pushVal() and inc() to work with the
-		//   same interface.
+	return opArr.reduce((newDataItem, opData) => {
+		const opPath = opData.path;
+		const opValue = opData.value;
+		const opFunc = operationLookup[opData.op];
+		const currentValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
+		const newData = opFunc(currentValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
+		
+		newDataItem = pathSetImmutable(newDataItem, opPath, newData);
 
 		if (!opFunc) {
 			throw new Error(`Unknown operation "${opData.op}" in operation ${JSON.stringify(opData)}`);
 		}
 
-		return opFunc(dataValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
-	});
+		return newDataItem;
+	}, dataItem);
 };
 
 const normalise = (data) => {
@@ -48,13 +35,21 @@ const normalise = (data) => {
 	return data;
 };
 
-export const $inc = (data, query, extraInfo = {}) => {
-	// Increment
-	debugger;
-	return normalise(data) + normalise(query);
+export const $inc = (data, value, extraInfo = {}) => {
+	return normalise(data) + normalise(value);
+};
+
+export const $replaceValue = (data, value, extraInfo = {}) => {
+	return value;
+};
+
+export const $push = (data, value, extraInfo = {}) => {
+	return [...data, value];
 };
 
 export const operationLookup = {
-	$replace,
-	$inc
+	$replaceValue,
+	$updateReplaceMode,
+	$inc,
+	$push
 };
