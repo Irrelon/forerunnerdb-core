@@ -1,10 +1,11 @@
 import {update as pathUpdate} from "@irrelon/path";
 import {matchPipeline} from "./match";
-import {queryToPipeline} from "./build";
+import {queryToPipeline, updateToPipeline} from "./build";
 import {
 	testFlight,
 	EnumTestFlightResult
 } from "./testFlight";
+import {operatePipeline} from "./operate";
 
 /**
  * @typedef {Object} UpdateOptions
@@ -43,24 +44,28 @@ export const update = async (dataArr, query, update = {}, options = {}) => {
 	const pipeline = queryToPipeline(query);
 	const updated = [];
 	const updateMap = {};
-	
+
 	const preFlightArr = [];
 	const postFlightArr = [];
-	
+
 	if (options.$preFlight) {
 		preFlightArr.push(options.$preFlight);
 	}
-	
+
 	if (options.$postFlight) {
 		postFlightArr.push(options.$postFlight);
 	}
-	
+
 	const executeFlight = (originalDoc) => {
+		// Build an update object for this document
+		const updatePipeline = updateToPipeline(update);
+		debugger;
+		const updatedDoc = operatePipeline(updatePipeline, originalDoc, {"originalUpdate": update});
 		return pathUpdate(originalDoc, update, {
 			"immutable": true
 		});
 	};
-	
+
 	// Loop through each item of data and check if it matches the query
 	for (let currentIndex = 0; currentIndex < dataArr.length; currentIndex++) {
 		const originalDoc = dataArr[currentIndex];
@@ -68,35 +73,35 @@ export const update = async (dataArr, query, update = {}, options = {}) => {
 
 		// If the document did not match our query, start on the next one
 		if (!matchResult) continue;
-		
+
 		const updatedDoc = await testFlight([originalDoc], preFlightArr, executeFlight, postFlightArr, {
 			"$atomic": options.$atomic,
 			"$ordered": options.$ordered
 		});
-		
+
 		// If we failed testFlight, skip to the next record
 		if (updatedDoc === EnumTestFlightResult.CANCEL) continue;
 		if (updatedDoc === EnumTestFlightResult.CANCEL_ORDERED) break;
 		if (updatedDoc === EnumTestFlightResult.CANCEL_ATOMIC) return [];
-		
+
 		updateMap[currentIndex] = updatedDoc;
 		updated.push(updatedDoc);
-		
+
 		if (options.$one === true) {
 			// Quit since we only wanted to update the first matching record ($one)
 			break;
 		}
 	}
-	
+
 	if (!options.$skipAssignment) {
 		// Update the document array
 		Object.entries(updateMap).forEach(([documentIndex, updatedDoc]) => {
 			dataArr[documentIndex] = updatedDoc;
 		});
 	}
-	
+
 	// TODO support $immutable and return a whole new dataArr
-	
+
 	return updated;
 };
 

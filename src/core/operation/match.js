@@ -4,11 +4,11 @@ export const gates = ["$and", "$or", "$not", "$nor"];
 
 export const matchPipeline = (pipeline, data, extraInfo = {"originalQuery": {}}) => {
 	const opFunc = operationLookup[pipeline.op];
-	
+
 	if (!opFunc) {
 		throw new Error(`Unknown operation "${pipeline.op}"`);
 	}
-	
+
 	return opFunc(data, pipeline.value, {"originalQuery": extraInfo.originalQuery, "operation": pipeline});
 };
 
@@ -19,20 +19,20 @@ export const $and = (dataItem, opArr, extraInfo = {"originalQuery": {}}) => {
 		let dataValue;
 		let opValue;
 		let opFunc;
-		
+
 		if (gates.indexOf(opData.op) > -1) {
 			// The operation is a gate
 			return operationLookup[opData.op](dataItem, opData.value, extraInfo);
 		}
-		
+
 		dataValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
 		opFunc = operationLookup[opData.op];
 		opValue = opData.value;
-		
+
 		if (!opFunc) {
 			throw new Error(`Unknown operation "${opData.op}" in operation ${JSON.stringify(opData)}`);
 		}
-		
+
 		return opFunc(dataValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
 	});
 };
@@ -48,20 +48,20 @@ export const $or = (dataItem, opArr, extraInfo = {"originalQuery": {}}) => {
 		let dataValue;
 		let opValue;
 		let opFunc;
-		
+
 		if (gates.indexOf(opData.op) > -1) {
 			// The operation is a gate
 			return operationLookup[opData.op](dataItem, opData.value, extraInfo);
 		}
-		
+
 		dataValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
 		opFunc = operationLookup[opData.op];
 		opValue = opData.value;
-		
+
 		if (!opFunc) {
 			throw new Error(`Unknown operation "${opData.op}"`);
 		}
-		
+
 		return opFunc(dataValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
 	});
 };
@@ -70,7 +70,7 @@ const normalise = (data) => {
 	if (data instanceof Date) {
 		return data.toISOString();
 	}
-	
+
 	return data;
 };
 
@@ -121,18 +121,18 @@ export const $in = (data, query, {originalQuery, operation} = {"originalQuery": 
 		let inArr = query,
 			inArrCount = inArr.length,
 			inArrIndex;
-		
+
 		for (inArrIndex = 0; inArrIndex < inArrCount; inArrIndex++) {
 			if ($eeq(data, inArr[inArrIndex], {originalQuery, operation})) {
 				return true;
 			}
 		}
-		
-		return false;
-	} else {
-		console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
+
 		return false;
 	}
+
+	console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
+	return false;
 };
 
 export const $nin = (data, query, {originalQuery, operation} = {"originalQuery": undefined, "operation": undefined}) => {
@@ -141,54 +141,54 @@ export const $nin = (data, query, {originalQuery, operation} = {"originalQuery":
 		let inArr = query,
 			inArrCount = inArr.length,
 			inArrIndex;
-		
+
 		for (inArrIndex = 0; inArrIndex < inArrCount; inArrIndex++) {
 			if ($eeq(data, inArr[inArrIndex], {originalQuery, operation})) {
 				return false;
 			}
 		}
-		
+
 		return true;
-	} else {
-		console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
-		return false;
 	}
+
+	console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
+	return false;
 };
 
 export const $fastIn = (data, query, {originalQuery, operation} = {"originalQuery": undefined, "operation": undefined}) => {
 	if (query instanceof Array) {
 		// Data is a string or number, use indexOf to identify match in array
 		return query.indexOf(data) !== -1;
-	} else {
-		console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
-		return false;
 	}
+
+	console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
+	return false;
 };
 
 export const $fastNin = (data, query, {originalQuery, operation} = {"originalQuery": undefined, "operation": undefined}) => {
 	if (query instanceof Array) {
 		// Data is a string or number, use indexOf to identify match in array
 		return query.indexOf(data) === -1;
-	} else {
-		console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
-		return false;
 	}
+
+	console.log(`Cannot use an $in operator on non-array data in query ${JSON.stringify(originalQuery)}`);
+	return false;
 };
 
 export const $distinct = (data, query) => {
 	let lookupPath,
 		value,
 		finalDistinctProp;
-	
+
 	// Ensure options holds a distinct lookup
 	options.$rootData["//distinctLookup"] = options.$rootData["//distinctLookup"] || {};
-	
+
 	for (const distinctProp in query) {
 		if (query.hasOwnProperty(distinctProp)) {
 			if (typeof query[distinctProp] === "object") {
 				// Get the path string from the object
 				lookupPath = this.sharedPathSolver.parse(query)[0].path;
-				
+
 				// Use the path string to find the lookup value from the data data
 				value = this.sharedPathSolver.get(data, lookupPath);
 				finalDistinctProp = lookupPath;
@@ -196,9 +196,9 @@ export const $distinct = (data, query) => {
 				value = data[distinctProp];
 				finalDistinctProp = distinctProp;
 			}
-			
+
 			options.$rootData["//distinctLookup"][finalDistinctProp] = options.$rootData["//distinctLookup"][finalDistinctProp] || {};
-			
+
 			// Check if the options distinct lookup has this field's value
 			if (options.$rootData["//distinctLookup"][finalDistinctProp][value]) {
 				// Value is already in use
@@ -206,7 +206,7 @@ export const $distinct = (data, query) => {
 			} else {
 				// Set the value in the lookup
 				options.$rootData["//distinctLookup"][finalDistinctProp][value] = true;
-				
+
 				// Allow the item in the results
 				return true;
 			}
@@ -218,7 +218,7 @@ export const $count = (data, query) => {
 	let countKey,
 		countArr,
 		countVal;
-	
+
 	// Iterate the count object's keys
 	for (countKey in query) {
 		if (query.hasOwnProperty(countKey)) {
@@ -230,14 +230,14 @@ export const $count = (data, query) => {
 			} else {
 				countVal = 0;
 			}
-			
+
 			// Now recurse down the query chain further to satisfy the query for this key (countKey)
 			if (!this._match(countVal, query[countKey], queryOptions, "and", options)) {
 				return false;
 			}
 		}
 	}
-	
+
 	// Allow the item in the results
 	return true;
 };

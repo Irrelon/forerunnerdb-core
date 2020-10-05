@@ -1,5 +1,5 @@
 import assert from "assert";
-import {$eeq, $eq, $in, queryFromObject, queryToPipeline} from "./build";
+import {$eeq, $eq, $in, queryFromObject, queryToPipeline, updateToPipeline} from "./build";
 import {extendedType} from "../../utils/type";
 
 describe("queryFromObject()", () => {
@@ -9,16 +9,16 @@ describe("queryFromObject()", () => {
 				"foo": true
 			}
 		};
-		
+
 		const expected = {
 			"bar.foo": true
 		};
-		
+
 		const result = queryFromObject(obj);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
-	
+
 	it("Will handle array indexes nicely", () => {
 		const obj = {
 			"bar": [{
@@ -26,14 +26,14 @@ describe("queryFromObject()", () => {
 			}],
 			"dt": new Date("2020-01-01T00:00:00Z")
 		};
-		
+
 		const expected = {
 			"bar.$.foo": true,
 			"dt": new Date("2020-01-01T00:00:00Z")
 		};
-		
+
 		const result = queryFromObject(obj);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 });
@@ -45,9 +45,9 @@ describe("build", () => {
 			"path": "bar.name",
 			"value": "Foo"
 		};
-		
+
 		data.typeData = extendedType(data.value);
-		
+
 		const expected = {
 			"op": data.op,
 			"path": data.path,
@@ -55,21 +55,21 @@ describe("build", () => {
 			"type": data.typeData.type,
 			"instance": data.typeData.instance
 		};
-		
+
 		const result = $eeq(data.path, data.value, data.typeData);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
-	
+
 	it("$eq", () => {
 		const data = {
 			"op": "$eq",
 			"path": "bar.name",
 			"value": ["Foo", "Bar"]
 		};
-		
+
 		data.typeData = extendedType(data.value);
-		
+
 		const expected = {
 			"op": data.op,
 			"path": data.path,
@@ -77,21 +77,21 @@ describe("build", () => {
 			"type": data.typeData.type,
 			"instance": data.typeData.instance
 		};
-		
+
 		const result = $eq(data.path, data.value, data.typeData);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
-	
+
 	it("$in", () => {
 		const data = {
 			"op": "$in",
 			"path": "bar.name",
 			"value": ["Foo", "Bar"]
 		};
-		
+
 		data.typeData = extendedType(data.value);
-		
+
 		const expected = {
 			"op": data.op,
 			"path": data.path,
@@ -99,9 +99,9 @@ describe("build", () => {
 			"type": data.typeData.type,
 			"instance": data.typeData.instance
 		};
-		
+
 		const result = $in(data.path, data.value, data.typeData);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 });
@@ -111,7 +111,7 @@ describe("queryToPipeline()", () => {
 		const query = {
 			"bar.name": "Foo"
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -125,9 +125,9 @@ describe("queryToPipeline()", () => {
 				"instance": ""
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 
@@ -179,7 +179,7 @@ describe("queryToPipeline()", () => {
 
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
-	
+
 	it("Explicit $and single tier", () => {
 		const query = {
 			"$and": [{
@@ -187,7 +187,7 @@ describe("queryToPipeline()", () => {
 				"bar.age": 22
 			}]
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -207,12 +207,12 @@ describe("queryToPipeline()", () => {
 				"instance": ""
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
-	
+
 	it("Explicit $and single tier, multi-sub-operations", () => {
 		const query = {
 			"$and": [{
@@ -224,7 +224,7 @@ describe("queryToPipeline()", () => {
 				}
 			}]
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -250,12 +250,12 @@ describe("queryToPipeline()", () => {
 				"op": "$lte"
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct data");
 	});
-	
+
 	it("Explicit $and single tier, equivalency", () => {
 		const query1 = {
 			"$and": [{
@@ -266,7 +266,7 @@ describe("queryToPipeline()", () => {
 				}
 			}]
 		};
-		
+
 		const query2 = {
 			"$and": [{
 				"bar.foo": true
@@ -277,7 +277,7 @@ describe("queryToPipeline()", () => {
 				}
 			}]
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -303,14 +303,14 @@ describe("queryToPipeline()", () => {
 				"instance": "Date"
 			}]
 		};
-		
+
 		const result1 = queryToPipeline(query1);
 		const result2 = queryToPipeline(query2);
-		
+
 		assert.deepStrictEqual(result1, expected, "Correct");
 		assert.deepStrictEqual(result2, expected, "Correct");
 	});
-	
+
 	it("Implicit $and single tier, multi-sub-operations", () => {
 		const query = {
 			"bar.foo": true,
@@ -319,7 +319,7 @@ describe("queryToPipeline()", () => {
 				"$lte": new Date("2020-04-01T00:00:00Z")
 			}
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -345,19 +345,19 @@ describe("queryToPipeline()", () => {
 				"instance": "Date"
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
-	
+
 	it("Implicit $and single tier, single-sub-operation", () => {
 		const query = {
 			"bar.name": {
 				"$in": ["Amelia", "Andy"]
 			}
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -371,12 +371,12 @@ describe("queryToPipeline()", () => {
 				"op": "$in"
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct data");
 	});
-	
+
 	it("Implicit $and single tier, multi-sub-operations with array value", () => {
 		const query = {
 			"bar.dt": new Date("2020-03-01T00:00:00Z"),
@@ -385,7 +385,7 @@ describe("queryToPipeline()", () => {
 				"$ne": "Andy"
 			}
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"instance": "",
@@ -411,19 +411,19 @@ describe("queryToPipeline()", () => {
 				"op": "$ne"
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
 		assert.deepStrictEqual(result, expected, "Correct data");
 	});
-	
+
 	it("Implicit $and single tier, single-sub-operation with array value", () => {
 		const query = {
 			"bar.name": {
 				"$in": ["Foo", "Bar"]
 			}
 		};
-		
+
 		const expected = {
 			"op": "$and",
 			"path": "",
@@ -437,9 +437,39 @@ describe("queryToPipeline()", () => {
 				"value": ["Foo", "Bar"]
 			}]
 		};
-		
+
 		const result = queryToPipeline(query);
-		
+
+		assert.deepStrictEqual(result, expected, "Correct");
+	});
+
+	it("Implicit $replace single tier, single-sub-operation with array value", () => {
+		const update = {
+			"$inc": {
+				"bar.val": 1,
+				"bar.val2": 2
+			}
+		};
+
+		const expected = {
+			"instance": "",
+			"op": "$replace",
+			"path": "",
+			"type": "array",
+			"value": [{
+				"instance": "Object",
+				"op": "$inc",
+				"path": "",
+				"type": "object",
+				"value": {
+					"bar.val": 1,
+					"bar.val2": 2
+				}
+			}]
+		};
+
+		const result = updateToPipeline(update);
+
 		assert.deepStrictEqual(result, expected, "Correct");
 	});
 });

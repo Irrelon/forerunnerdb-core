@@ -30,7 +30,6 @@ import update from "./operation/update";
  * @property {Array<Object>} notInserted Array of documents that failed to insert.
  * @property {Array<OperationFailure>} failures Array of failed operation results.
  */
-
 class Collection extends CoreClass {
 	constructor (name) {
 		super();
@@ -61,13 +60,13 @@ class Collection extends CoreClass {
 		return doc;
 	};
 	
-	_indexInsert (doc) {
+	_indexInsert = (doc) => {
 		// Return true if we DIDN'T find an error
 		return !this._index.find((indexObj) => {
 			// Return true (found an error) if the result was false
 			return indexObj.index.insert(doc) === false;
 		});
-	}
+	};
 	
 	/**
 	 * Scans the collection indexes and checks that the passed doc does
@@ -122,7 +121,7 @@ class Collection extends CoreClass {
 	 * @param {object} [options={}] Optional options object.
 	 * @returns {OperationResult} The result of the operation(s).
 	 */
-	operation (docOrArr, func, options = {}) {
+	operation = (docOrArr, func, options = {}) => {
 		const opResult = new OperationResult();
 		const isArray = Array.isArray(docOrArr);
 		
@@ -150,7 +149,7 @@ class Collection extends CoreClass {
 		}
 		
 		return opResult;
-	}
+	};
 	
 	/**
 	 * Run a single operation on a single or multiple data items.
@@ -159,7 +158,7 @@ class Collection extends CoreClass {
 	 * @param {function} func The operation to run on each data item.
 	 * @param {object} [options={}] Optional options object.
 	 */
-	silentOperation (docOrArr, func, options = {}) {
+	silentOperation = (docOrArr, func, options = {}) => {
 		const isArray = Array.isArray(docOrArr);
 		
 		let data = docOrArr;
@@ -172,7 +171,7 @@ class Collection extends CoreClass {
 			const doc = data[currentIndex];
 			func(doc, options);
 		}
-	}
+	};
 	
 	pushData = (doc) => {
 		this._indexInsert(doc);
@@ -205,7 +204,7 @@ class Collection extends CoreClass {
 		});
 
 		return insertResult;
-	}
+	};
 
 	_insertOrdered = async (data) => {
 		const insertResult = {
@@ -231,7 +230,7 @@ class Collection extends CoreClass {
 		}
 
 		return insertResult;
-	}
+	};
 
 	_insertDocument = async (doc) => {
 		// 1. Ensure primary key
@@ -250,7 +249,7 @@ class Collection extends CoreClass {
 		return new OperationSuccess({
 			data: newDoc
 		});
-	}
+	};
 
 	/**
 	 * Insert a document or array of documents into the collection.
@@ -307,21 +306,21 @@ class Collection extends CoreClass {
 			nInserted: insertOperationResult.inserted.length,
 			nFailed: insertOperationResult.notInserted.length,
 		};
-	}
+	};
 	
-	find (queryObj = {}, options = {}) {
+	find = (queryObj = {}, options = {}) => {
 		return find(this._data, queryObj);
-	}
+	};
 	
-	findOne (queryObj, options) {
+	findOne = (queryObj, options) => {
 		return this.find(queryObj, options)[0];
-	}
+	};
 	
-	findMany (queryObj, options) {
+	findMany = (queryObj, options) => {
 		return this.find(queryObj, options);
-	}
+	};
 	
-	update (queryObj, updateObj, options) {
+	update = (queryObj, updateObj, options) => {
 		// TODO: Add option to run a sanity check on each match before and update
 		//  is performed so we can check if an index violation would occur
 		const resultArr = update(this._data, queryObj, updateObj, options);
@@ -330,33 +329,33 @@ class Collection extends CoreClass {
 		//  update object match fields that are in the index. If they are, remove each
 		//  document from the index and re-index them
 		return resultArr;
-	}
+	};
 	
-	updateOne (queryObj, update, options) {
+	updateOne = (queryObj, update, options) => {
 		return this.update(queryObj, update, {...options, "$one": true});
-	}
+	};
 	
-	updateMany (queryObj, update, options) {
+	updateMany = (queryObj, update, options) => {
 		return this.update(queryObj, update, options);
-	}
+	};
 	
-	remove (queryObj = {}, options = {}) {
+	remove = (queryObj = {}, options = {}) => {
 	
-	}
+	};
 	
-	removeOne (queryObj, options) {
+	removeOne = (queryObj, options) => {
 		return this.remove(queryObj, {...options, "$one": true});
-	}
+	};
 	
-	removeMany (queryObj, options) {
+	removeMany = (queryObj, options) => {
 		return this.remove(queryObj, options);
-	}
+	};
 	
-	removeById (id) {
+	removeById = (id) => {
 		return this.removeOne({
 			[this._primaryKey]: id
 		});
-	}
+	};
 }
 
 export default Collection;
