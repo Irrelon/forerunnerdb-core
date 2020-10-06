@@ -7,6 +7,7 @@ import OperationFailure from "../operations/OperationFailure";
 import OperationSuccess from "../operations/OperationSuccess";
 import find from "./operation/find";
 import update from "./operation/update";
+import remove from "./operation/remove";
 
 /**
  * @typedef {Object} InsertOptions
@@ -33,7 +34,7 @@ import update from "./operation/update";
 class Collection extends CoreClass {
 	constructor (name) {
 		super();
-		
+
 		this._name = name;
 		this._cap = 0;
 		this._primaryKey = "_id";
@@ -43,7 +44,7 @@ class Collection extends CoreClass {
 			"index": new IndexHashMap({[this._primaryKey]: 1}, {"unique": true})
 		}];
 	}
-	
+
 	/**
 	 * Checks for a primary key on the document and assigns one if none
 	 * currently exists.
@@ -56,10 +57,10 @@ class Collection extends CoreClass {
 			// Assign a primary key automatically
 			return pathSetImmutable(doc, this._primaryKey, objectId());
 		}
-		
+
 		return doc;
 	};
-	
+
 	_indexInsert = (doc) => {
 		// Return true if we DIDN'T find an error
 		return !this._index.find((indexObj) => {
@@ -67,7 +68,7 @@ class Collection extends CoreClass {
 			return indexObj.index.insert(doc) === false;
 		});
 	};
-	
+
 	/**
 	 * Scans the collection indexes and checks that the passed doc does
 	 * not violate any index constraints.
@@ -77,11 +78,11 @@ class Collection extends CoreClass {
 	 */
 	indexViolationCheck = (doc, options = {}) => {
 		let indexArray = this._index;
-		
+
 		if (options.indexArray) {
 			indexArray = options.indexArray;
 		}
-		
+
 		// Loop each index and ask it to check if this
 		// document violates any index constraints
 		for (let indexNum = 0; indexNum < indexArray.length; indexNum++) {
@@ -112,7 +113,7 @@ class Collection extends CoreClass {
 			"data": doc
 		});
 	};
-	
+
 	/**
 	 * Run a single operation on a single or multiple data items.
 	 * @param {object|Array<object>} docOrArr An array of data items or
@@ -124,33 +125,33 @@ class Collection extends CoreClass {
 	operation = (docOrArr, func, options = {}) => {
 		const opResult = new OperationResult();
 		const isArray = Array.isArray(docOrArr);
-		
+
 		let data = docOrArr;
-		
+
 		if (!isArray) {
 			data = [docOrArr];
 		}
-		
+
 		for (let currentIndex = 0; currentIndex < data.length; currentIndex++) {
 			const doc = data[currentIndex];
 			const result = func(doc, options);
-			
+
 			if (!result) {
 				continue;
 			}
-			
+
 			result.atIndex = currentIndex;
 			opResult.addResult(result);
-			
+
 			if (options.breakOnFailure && result instanceof OperationFailure) {
 				// The result was a failure, break now
 				break;
 			}
 		}
-		
+
 		return opResult;
 	};
-	
+
 	/**
 	 * Run a single operation on a single or multiple data items.
 	 * @param {object|Array<object>} docOrArr An array of data items or
@@ -160,19 +161,19 @@ class Collection extends CoreClass {
 	 */
 	silentOperation = (docOrArr, func, options = {}) => {
 		const isArray = Array.isArray(docOrArr);
-		
+
 		let data = docOrArr;
-		
+
 		if (!isArray) {
 			data = [docOrArr];
 		}
-		
+
 		for (let currentIndex = 0; currentIndex < data.length; currentIndex++) {
 			const doc = data[currentIndex];
 			func(doc, options);
 		}
 	};
-	
+
 	pushData = (doc) => {
 		this._indexInsert(doc);
 		this._data.push(doc);
@@ -266,7 +267,7 @@ class Collection extends CoreClass {
 		if (!isArray) {
 			data = [data];
 		}
-		
+
 		const insertResult = {
 			"operation": {
 				isArray,
@@ -290,7 +291,7 @@ class Collection extends CoreClass {
 		} else {
 			insertOperationResult = await this._insertUnordered(data);
 		}
-		
+
 		// Check capped collection status and remove first record
 		// if we are over the threshold
 		if (this._cap && this._data.length > this._cap) {
@@ -298,7 +299,7 @@ class Collection extends CoreClass {
 			// TODO this assumes a single insert, modify to handle multiple docs inserted at once
 			this.removeById(pathGet(this._data[0], this._primaryKey));
 		}
-		
+
 		// 5 Return result
 		return {
 			...insertResult,
@@ -307,50 +308,55 @@ class Collection extends CoreClass {
 			nFailed: insertOperationResult.notInserted.length,
 		};
 	};
-	
+
 	find = (queryObj = {}, options = {}) => {
 		return find(this._data, queryObj);
 	};
-	
-	findOne = (queryObj, options) => {
+
+	findOne = (queryObj, options = {}) => {
 		return this.find(queryObj, options)[0];
 	};
-	
-	findMany = (queryObj, options) => {
+
+	findMany = (queryObj, options = {}) => {
 		return this.find(queryObj, options);
 	};
-	
-	update = (queryObj, updateObj, options) => {
+
+	update = (queryObj, updateObj, options = {}) => {
 		// TODO: Add option to run a sanity check on each match before and update
 		//  is performed so we can check if an index violation would occur
 		const resultArr = update(this._data, queryObj, updateObj, options);
-		
+
 		// TODO: Now loop the result array and check if any fields that are in the
 		//  update object match fields that are in the index. If they are, remove each
 		//  document from the index and re-index them
 		return resultArr;
 	};
-	
-	updateOne = (queryObj, update, options) => {
+
+	updateOne = (queryObj, update, options = {}) => {
 		return this.update(queryObj, update, {...options, "$one": true});
 	};
-	
-	updateMany = (queryObj, update, options) => {
+
+	updateMany = (queryObj, update, options = {}) => {
 		return this.update(queryObj, update, options);
 	};
-	
+
 	remove = (queryObj = {}, options = {}) => {
-	
+		const resultArr = remove(this._data, queryObj, options);
+
+		// TODO: Now loop the result array and check if any fields that are in the
+		//  remove array match objects that are in the index. If they are, remove each
+		//  document from the index
+		return resultArr;
 	};
-	
-	removeOne = (queryObj, options) => {
+
+	removeOne = (queryObj, options = {}) => {
 		return this.remove(queryObj, {...options, "$one": true});
 	};
-	
-	removeMany = (queryObj, options) => {
+
+	removeMany = (queryObj, options = {}) => {
 		return this.remove(queryObj, options);
 	};
-	
+
 	removeById = (id) => {
 		return this.removeOne({
 			[this._primaryKey]: id
