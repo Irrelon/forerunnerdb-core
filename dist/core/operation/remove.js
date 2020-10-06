@@ -5,15 +5,13 @@ var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefau
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = exports.update = void 0;
+exports["default"] = exports.remove = void 0;
 
 var _regenerator = _interopRequireDefault(require("@babel/runtime/regenerator"));
 
-var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/slicedToArray"));
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
-
-var _path = require("@irrelon/path");
 
 var _match = require("./match");
 
@@ -21,10 +19,12 @@ var _build = require("./build");
 
 var _testFlight = require("./testFlight");
 
-var _operate = require("./operate");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
 /**
- * @typedef {Object} UpdateOptions
+ * @typedef {Object} RemoveOptions
  * @property {Boolean} [$one=false] When true, will only update the first
  * document that matched the query. The return array will only contain
  * one element at most.
@@ -45,41 +45,39 @@ var _operate = require("./operate");
  */
 
 /**
- * Update does a search for matching records in an array of data based on
- * the passed query and then modifies the data based on the passed update
- * object.
+ * Remove does a search for matching records in an array of data based on
+ * the passed query and then removes the matching records from the array.
  * @param {Array<Object>} dataArr The array of data to query.
  * @param {Object} query A query object.
- * @param {Object} update The update object.
- * @param {UpdateOptions} [options] An options object.
- * @returns {Promise<Array<Object>>} The array of data that matched the passed query
- * and received an update.
+ * @param {RemoveOptions} [options] An options object.
+ * @returns {Promise<Array<Object>>} The new array of documents with the
+ * matching documents removed.
  */
-var update = /*#__PURE__*/function () {
-  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(dataArr, query) {
-    var update,
+var remove = /*#__PURE__*/function () {
+  var _ref = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee(dataArr) {
+    var query,
         options,
         pipeline,
-        updated,
-        updateMap,
+        removed,
+        removeMap,
         preFlightArr,
         postFlightArr,
         executeFlight,
         currentIndex,
         originalDoc,
         matchResult,
-        updatedDoc,
+        removedDoc,
         _args = arguments;
     return _regenerator["default"].wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            update = _args.length > 2 && _args[2] !== undefined ? _args[2] : {};
-            options = _args.length > 3 && _args[3] !== undefined ? _args[3] : {};
+            query = _args.length > 1 && _args[1] !== undefined ? _args[1] : {};
+            options = _args.length > 2 && _args[2] !== undefined ? _args[2] : {};
             // Break query into operations
             pipeline = (0, _build.queryToPipeline)(query);
-            updated = [];
-            updateMap = {};
+            removed = [];
+            removeMap = [];
             preFlightArr = [];
             postFlightArr = [];
 
@@ -92,14 +90,7 @@ var update = /*#__PURE__*/function () {
             }
 
             executeFlight = function executeFlight(originalDoc) {
-              // Build an update object for this document
-              var updatePipeline = (0, _build.updateToPipeline)(update);
-              var updatedDoc = (0, _operate.operatePipeline)(updatePipeline, originalDoc, {
-                "originalUpdate": update
-              });
-              return (0, _path.update)(originalDoc, updatedDoc, {
-                "immutable": true
-              });
+              return _objectSpread({}, originalDoc);
             }; // Loop through each item of data and check if it matches the query
 
 
@@ -131,9 +122,9 @@ var update = /*#__PURE__*/function () {
             });
 
           case 18:
-            updatedDoc = _context.sent;
+            removedDoc = _context.sent;
 
-            if (!(updatedDoc === _testFlight.EnumTestFlightResult.CANCEL)) {
+            if (!(removedDoc === _testFlight.EnumTestFlightResult.CANCEL)) {
               _context.next = 21;
               break;
             }
@@ -141,7 +132,7 @@ var update = /*#__PURE__*/function () {
             return _context.abrupt("continue", 29);
 
           case 21:
-            if (!(updatedDoc === _testFlight.EnumTestFlightResult.CANCEL_ORDERED)) {
+            if (!(removedDoc === _testFlight.EnumTestFlightResult.CANCEL_ORDERED)) {
               _context.next = 23;
               break;
             }
@@ -149,7 +140,7 @@ var update = /*#__PURE__*/function () {
             return _context.abrupt("break", 32);
 
           case 23:
-            if (!(updatedDoc === _testFlight.EnumTestFlightResult.CANCEL_ATOMIC)) {
+            if (!(removedDoc === _testFlight.EnumTestFlightResult.CANCEL_ATOMIC)) {
               _context.next = 25;
               break;
             }
@@ -157,8 +148,8 @@ var update = /*#__PURE__*/function () {
             return _context.abrupt("return", []);
 
           case 25:
-            updateMap[currentIndex] = updatedDoc;
-            updated.push(updatedDoc);
+            removeMap.push(currentIndex);
+            removed.push(removedDoc);
 
             if (!(options.$one === true)) {
               _context.next = 29;
@@ -174,18 +165,14 @@ var update = /*#__PURE__*/function () {
 
           case 32:
             if (!options.$skipAssignment) {
-              // Update the document array
-              Object.entries(updateMap).forEach(function (_ref2) {
-                var _ref3 = (0, _slicedToArray2["default"])(_ref2, 2),
-                    documentIndex = _ref3[0],
-                    updatedDoc = _ref3[1];
-
-                dataArr[documentIndex] = updatedDoc;
+              // Update the document array by removing the matching records
+              removeMap.reverse().forEach(function (documentIndex) {
+                dataArr.splice(documentIndex, 1);
               });
             } // TODO support $immutable and return a whole new dataArr
 
 
-            return _context.abrupt("return", updated);
+            return _context.abrupt("return", removed);
 
           case 34:
           case "end":
@@ -195,11 +182,11 @@ var update = /*#__PURE__*/function () {
     }, _callee);
   }));
 
-  return function update(_x, _x2) {
+  return function remove(_x) {
     return _ref.apply(this, arguments);
   };
 }();
 
-exports.update = update;
-var _default = update;
+exports.remove = remove;
+var _default = remove;
 exports["default"] = _default;
