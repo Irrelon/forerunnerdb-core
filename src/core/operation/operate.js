@@ -1,6 +1,7 @@
 import {
 	get as pathGet,
 	setImmutable as pathSetImmutable,
+	unSetImmutable as pathUnSetImmutable,
 	match as pathMatch
 } from "@irrelon/path";
 
@@ -21,10 +22,15 @@ export const $updateReplaceMode = (dataItem, opArr, extraInfo = {"originalQuery"
 		const opPath = opData.path;
 		const opValue = opData.value;
 		const opFunc = operationLookup[opData.op];
-		const currentValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
-		const newData = opFunc(currentValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
-		
-		newDataItem = pathSetImmutable(newDataItem, opPath, newData);
+
+		if (!opFunc.selfControlled) {
+			const currentValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
+			const newData = opFunc(currentValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
+
+			newDataItem = pathSetImmutable(newDataItem, opPath, newData);
+		} else {
+			newDataItem = opFunc(newDataItem, opPath, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
+		}
 
 		if (!opFunc) {
 			throw new Error(`Unknown operation "${opData.op}" in operation ${JSON.stringify(opData)}`);
@@ -59,7 +65,7 @@ export const $pull = (data, value, extraInfo = {}) => {
 		} else {
 			newArr.push(item);
 		}
-		
+
 		return newArr;
 	}, []);
 };
@@ -69,7 +75,7 @@ export const $pullAll = (data, value, extraInfo = {}) => {
 		if (!pathMatch(item, value)) {
 			newArr.push(item);
 		}
-		
+
 		return newArr;
 	}, []);
 };
@@ -83,6 +89,12 @@ export const $shift = (data, value, extraInfo = {}) => {
 	return newArr;
 };
 
+export const $unset = (newDataItem, opPath, opValue, extraInfo = {}) => {
+	return pathUnSetImmutable(newDataItem, opPath);
+};
+
+$unset.selfControlled = true;
+
 export const operationLookup = {
 	$replaceValue,
 	$updateReplaceMode,
@@ -91,7 +103,8 @@ export const operationLookup = {
 	$pull,
 	$pullAll,
 	$pop,
-	$shift
+	$shift,
+	$unset
 };
 
 // TODO: Write
