@@ -15,6 +15,7 @@ import remove from "./operation/remove";
  * documents in the `data` argument.
  * @property {Boolean} [$ordered=false] If true, inserts will stop at any failure but
  * previously inserted documents will still remain inserted.
+ * @property {Boolean} [$one=false] If true, inserts will stop after the first document.
  */
 
 /**
@@ -61,6 +62,12 @@ class Collection extends CoreClass {
 		return doc;
 	};
 
+	/**
+	 * Inserts a document into the indexes currently defined in the collection.
+	 * @param {Object} doc The document to insert.
+	 * @returns {boolean} True if successful, false if unsuccessful.
+	 * @private
+	 */
 	_indexInsert = (doc) => {
 		// Return true if we DIDN'T find an error
 		return !this._index.find((indexObj) => {
@@ -247,6 +254,7 @@ class Collection extends CoreClass {
 		// 4. Insert into indexes
 		this._indexInsert(newDoc);
 
+		// 5. Return a successful operation
 		return new OperationSuccess({
 			data: newDoc
 		});
@@ -297,7 +305,7 @@ class Collection extends CoreClass {
 		if (this._cap && this._data.length > this._cap) {
 			// Remove the first item in the data array
 			// TODO this assumes a single insert, modify to handle multiple docs inserted at once
-			this.removeById(pathGet(this._data[0], this._primaryKey));
+			await this.removeById(pathGet(this._data[0], this._primaryKey));
 		}
 
 		// 5 Return result
@@ -309,15 +317,23 @@ class Collection extends CoreClass {
 		};
 	};
 
+	insertOne = async (data, options = {"$atomic": false, "$ordered": false}) => {
+		return this.insert(data, {...options, "$one": true});
+	};
+
+	insertMany = async (data, options = {"$atomic": false, "$ordered": false}) => {
+		return this.insert(data, options);
+	};
+
 	find = (queryObj = {}, options = {}) => {
 		return find(this._data, queryObj);
 	};
 
-	findOne = (queryObj, options = {}) => {
+	findOne = (queryObj = {}, options = {}) => {
 		return this.find(queryObj, options)[0];
 	};
 
-	findMany = (queryObj, options = {}) => {
+	findMany = (queryObj = {}, options = {}) => {
 		return this.find(queryObj, options);
 	};
 
