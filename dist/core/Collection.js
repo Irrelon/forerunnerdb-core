@@ -57,6 +57,7 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
  * documents in the `data` argument.
  * @property {Boolean} [$ordered=false] If true, inserts will stop at any failure but
  * previously inserted documents will still remain inserted.
+ * @property {Boolean} [$one=false] If true, inserts will stop after the first document.
  */
 
 /**
@@ -313,7 +314,8 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
                 _this._data.push(newDoc); // 4. Insert into indexes
 
 
-                _this._indexInsert(newDoc);
+                _this._indexInsert(newDoc); // 5. Return a successful operation
+
 
                 return _context3.abrupt("return", new _OperationSuccess["default"]({
                   data: newDoc
@@ -405,21 +407,21 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
                 insertOperationResult = _context4.sent;
 
               case 21:
-                // Check capped collection status and remove first record
-                // if we are over the threshold
-                if (_this._cap && _this._data.length > _this._cap) {
-                  // Remove the first item in the data array
-                  // TODO this assumes a single insert, modify to handle multiple docs inserted at once
-                  _this.removeById((0, _path.get)(_this._data[0], _this._primaryKey));
-                } // 5 Return result
+                if (!(_this._cap && _this._data.length > _this._cap)) {
+                  _context4.next = 24;
+                  break;
+                }
 
+                _context4.next = 24;
+                return _this.removeById((0, _path.get)(_this._data[0], _this._primaryKey));
 
+              case 24:
                 return _context4.abrupt("return", _objectSpread(_objectSpread(_objectSpread({}, insertResult), insertOperationResult), {}, {
                   nInserted: insertOperationResult.inserted.length,
                   nFailed: insertOperationResult.notInserted.length
                 }));
 
-              case 23:
+              case 25:
               case "end":
                 return _context4.stop();
             }
@@ -431,16 +433,72 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
         return _ref4.apply(this, arguments);
       };
     }());
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "insertOne", /*#__PURE__*/function () {
+      var _ref5 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee5(data) {
+        var options,
+            _args5 = arguments;
+        return _regenerator["default"].wrap(function _callee5$(_context5) {
+          while (1) {
+            switch (_context5.prev = _context5.next) {
+              case 0:
+                options = _args5.length > 1 && _args5[1] !== undefined ? _args5[1] : {
+                  "$atomic": false,
+                  "$ordered": false
+                };
+                return _context5.abrupt("return", _this.insert(data, _objectSpread(_objectSpread({}, options), {}, {
+                  "$one": true
+                })));
+
+              case 2:
+              case "end":
+                return _context5.stop();
+            }
+          }
+        }, _callee5);
+      }));
+
+      return function (_x5) {
+        return _ref5.apply(this, arguments);
+      };
+    }());
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "insertMany", /*#__PURE__*/function () {
+      var _ref6 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee6(data) {
+        var options,
+            _args6 = arguments;
+        return _regenerator["default"].wrap(function _callee6$(_context6) {
+          while (1) {
+            switch (_context6.prev = _context6.next) {
+              case 0:
+                options = _args6.length > 1 && _args6[1] !== undefined ? _args6[1] : {
+                  "$atomic": false,
+                  "$ordered": false
+                };
+                return _context6.abrupt("return", _this.insert(data, options));
+
+              case 2:
+              case "end":
+                return _context6.stop();
+            }
+          }
+        }, _callee6);
+      }));
+
+      return function (_x6) {
+        return _ref6.apply(this, arguments);
+      };
+    }());
     (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "find", function () {
       var queryObj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       return (0, _find["default"])(_this._data, queryObj);
     });
-    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "findOne", function (queryObj) {
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "findOne", function () {
+      var queryObj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       return _this.find(queryObj, options)[0];
     });
-    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "findMany", function (queryObj) {
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "findMany", function () {
+      var queryObj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       return _this.find(queryObj, options);
     });
