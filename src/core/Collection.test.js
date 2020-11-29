@@ -232,7 +232,7 @@ describe("Collection", () => {
 
 			const findResult1 = await coll.find();
 
-			const updateResult = await coll.removeOne({
+			const removeResult = await coll.removeOne({
 				"_id": "2"
 			});
 
@@ -240,11 +240,50 @@ describe("Collection", () => {
 
 			assert.strictEqual(insertResult.nInserted, 2, "Number of inserted documents is correct");
 			assert.strictEqual(findResult1.length, 2, "Number of documents is correct");
-			assert.strictEqual(updateResult.length, 1, "Number of documents is correct");
+			assert.strictEqual(removeResult.length, 1, "Number of documents is correct");
 			assert.strictEqual(findResult2.length, 1, "Number of documents is correct");
 			assert.deepStrictEqual(findResult2, [{
 				"_id": "1",
 				"count": 0
+			}], "Correct value");
+		});
+
+		it("Can remove multiple documents", async () => {
+			const coll = new Collection();
+			const insertResult = await coll.insert([{
+				"_id": "1",
+				"count": 0
+			}, {
+				"_id": "2",
+				"count": 12
+			}, {
+				"_id": "3",
+				"count": 12
+			}, {
+				"_id": "4",
+				"count": 11
+			}]);
+
+			const findResult1 = await coll.find();
+
+			const removeResult = await coll.removeMany({
+				"count": {
+					"$gt": 11
+				}
+			});
+
+			const findResult2 = await coll.find();
+
+			assert.strictEqual(insertResult.nInserted, 4, "Number of inserted documents is correct");
+			assert.strictEqual(findResult1.length, 4, "Number of documents is correct");
+			assert.strictEqual(removeResult.length, 2, "Number of documents is correct");
+			assert.strictEqual(findResult2.length, 2, "Number of documents is correct");
+			assert.deepStrictEqual(findResult2, [{
+				"_id": "1",
+				"count": 0
+			}, {
+				"_id": "4",
+				"count": 11
 			}], "Correct value");
 		});
 	});
