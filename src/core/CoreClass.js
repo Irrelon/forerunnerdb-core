@@ -1,3 +1,4 @@
+import emitter from "@irrelon/emitter";
 const _synth = {};
 
 class CoreClass {
@@ -11,12 +12,14 @@ class CoreClass {
 				this["_" + name] = val;
 				return this;
 			}
-			
+
 			return this["_" + name];
 		};
-		
+
 		return _synth[name];
 	}
 }
+
+emitter(CoreClass);
 
 export default CoreClass;
