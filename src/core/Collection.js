@@ -8,6 +8,7 @@ import OperationSuccess from "../operations/OperationSuccess";
 import find from "./operation/find";
 import update from "./operation/update";
 import remove from "./operation/remove";
+import {pull} from "../utils/pull";
 
 /**
  * @typedef {Object} InsertOptions
@@ -33,6 +34,8 @@ import remove from "./operation/remove";
  * @property {Array<OperationFailure>} failures Array of failed operation results.
  */
 class Collection extends CoreClass {
+	_receivers = [];
+
 	constructor (name) {
 		super();
 
@@ -157,28 +160,6 @@ class Collection extends CoreClass {
 		}
 
 		return opResult;
-	};
-
-	/**
-	 * Run a single operation on a single or multiple data items.
-	 * @param {object|Array<object>} docOrArr An array of data items or
-	 * a single data item object.
-	 * @param {function} func The operation to run on each data item.
-	 * @param {object} [options={}] Optional options object.
-	 */
-	silentOperation = (docOrArr, func, options = {}) => {
-		const isArray = Array.isArray(docOrArr);
-
-		let data = docOrArr;
-
-		if (!isArray) {
-			data = [docOrArr];
-		}
-
-		for (let currentIndex = 0; currentIndex < data.length; currentIndex++) {
-			const doc = data[currentIndex];
-			func(doc, options);
-		}
 	};
 
 	pushData = (doc) => {
@@ -308,6 +289,8 @@ class Collection extends CoreClass {
 			await this.removeById(pathGet(this._data[0], this._primaryKey));
 		}
 
+		this.emit("insert", {insertResult, insertOperationResult, data});
+
 		// 5 Return result
 		return {
 			...insertResult,
@@ -342,6 +325,8 @@ class Collection extends CoreClass {
 		//  is performed so we can check if an index violation would occur
 		const resultArr = update(this._data, queryObj, updateObj, options);
 
+		this.emit("update", {resultArr, queryObj, updateObj, options});
+
 		// TODO: Now loop the result array and check if any fields that are in the
 		//  update object match fields that are in the index. If they are, remove each
 		//  document from the index and re-index them
@@ -358,6 +343,8 @@ class Collection extends CoreClass {
 
 	remove = (queryObj = {}, options = {}) => {
 		const resultArr = remove(this._data, queryObj, options);
+
+		this.emit("remove", {resultArr, queryObj, options});
 
 		// TODO: Now loop the result array and check if any fields that are in the
 		//  remove array match objects that are in the index. If they are, remove each
@@ -377,6 +364,36 @@ class Collection extends CoreClass {
 		return this.removeOne({
 			[this._primaryKey]: id
 		});
+	};
+
+	pipe = (receiver) => {
+		this._receivers.push(receiver);
+
+		this.on("insert", (args) => {
+
+		});
+	};
+
+	unPipe = (receiver) => {
+		pull(this._receivers, receiver);
+	};
+
+	/**
+	 *
+	 * @param path
+	 * @returns {Promise<Collection>}
+	 */
+	virtual = async (path) => {
+		const newCollection = new Collection();
+
+		// Set initial data
+		// TODO: Make path selection with .$. work
+		const initialData = await this.find(path);
+		await newCollection.insert(initialData);
+
+		this.pipe(newCollection);
+
+		return newCollection;
 	};
 }
 

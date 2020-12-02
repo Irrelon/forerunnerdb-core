@@ -309,4 +309,48 @@ describe("Collection", () => {
 			});
 		});
 	});
+
+	describe("Virtual Queries", () => {
+		describe("virtual()", () => {
+			it("Can create a virtual collection", async () => {
+				const collectionData = [{
+					"nodes": [{
+						"_id": "1",
+						"connections": [{
+							"_id": "1",
+							"fromNodeId": "1",
+							"toNodeId": "2"
+						}]
+					}, {
+						"_id": "2",
+						"connections": [{
+							"_id": "2",
+							"fromNodeId": "2",
+							"toNodeId": "1"
+						}]
+					}]
+				}];
+
+				const coll = new Collection("deepQueryTestCollection");
+				coll.insertMany(collectionData);
+
+				const virtualCollection = await coll.virtual("nodes.$.connections.$");
+
+				const findResult1 = await coll.find();
+				const findResult2 = await virtualCollection.find();
+
+				assert.strictEqual(findResult1.length, 1, "Number of documents is correct");
+				assert.strictEqual(findResult2.length, 2, "Number of documents is correct");
+				assert.deepStrictEqual(findResult2, [{
+					"_id": "1",
+					"fromNodeId": "1",
+					"toNodeId": "2"
+				}, {
+					"_id": "2",
+					"fromNodeId": "2",
+					"toNodeId": "1"
+				}], "Correct value");
+			});
+		});
+	});
 });

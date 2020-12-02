@@ -217,4 +217,24 @@ describe("find()", () => {
 		assert.strictEqual(result[0].phone, "", "Details correct");
 		assert.strictEqual(result[0].fax, "", "Details correct");
 	});
+
+	describe("Array Wildcards", () => {
+		it("Handles array wildcards", () => {
+			const data = [{
+				"arr": [{
+					"arr": [{
+						"item": 1
+					}]
+				}, {
+					"arr": [{
+						"item": 2
+					}]
+				}]
+			}];
+
+			const result = find(data, "arr.$.arr.$");
+
+			assert.deepStrictEqual(result, [{"item": 1}, {"item": 2}]);
+		});
+	});
 });
