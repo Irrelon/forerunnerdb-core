@@ -600,4 +600,70 @@ describe("Collection", function () {
       });
     });
   });
+  describe("Virtual Queries", function () {
+    describe("virtual()", function () {
+      it("Can create a virtual collection", /*#__PURE__*/(0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee12() {
+        var collectionData, coll, virtualCollection, findResult1, findResult2;
+        return _regenerator["default"].wrap(function _callee12$(_context12) {
+          while (1) {
+            switch (_context12.prev = _context12.next) {
+              case 0:
+                collectionData = [{
+                  "nodes": [{
+                    "_id": "1",
+                    "connections": [{
+                      "_id": "1",
+                      "fromNodeId": "1",
+                      "toNodeId": "2"
+                    }]
+                  }, {
+                    "_id": "2",
+                    "connections": [{
+                      "_id": "2",
+                      "fromNodeId": "2",
+                      "toNodeId": "1"
+                    }]
+                  }]
+                }];
+                coll = new _Collection["default"]("deepQueryTestCollection");
+                coll.insertMany(collectionData);
+                _context12.next = 5;
+                return coll.virtual("nodes.$.connections.$");
+
+              case 5:
+                virtualCollection = _context12.sent;
+                _context12.next = 8;
+                return coll.find();
+
+              case 8:
+                findResult1 = _context12.sent;
+                _context12.next = 11;
+                return virtualCollection.find();
+
+              case 11:
+                findResult2 = _context12.sent;
+
+                _assert["default"].strictEqual(findResult1.length, 1, "Number of documents is correct");
+
+                _assert["default"].strictEqual(findResult2.length, 2, "Number of documents is correct");
+
+                _assert["default"].deepStrictEqual(findResult2, [{
+                  "_id": "1",
+                  "fromNodeId": "1",
+                  "toNodeId": "2"
+                }, {
+                  "_id": "2",
+                  "fromNodeId": "2",
+                  "toNodeId": "1"
+                }], "Correct value");
+
+              case 15:
+              case "end":
+                return _context12.stop();
+            }
+          }
+        }, _callee12);
+      })));
+    });
+  });
 });

@@ -11,6 +11,8 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _emitter = _interopRequireDefault(require("@irrelon/emitter"));
+
 var _synth = {};
 
 var CoreClass = /*#__PURE__*/function () {
@@ -41,5 +43,6 @@ var CoreClass = /*#__PURE__*/function () {
   return CoreClass;
 }();
 
+(0, _emitter["default"])(CoreClass);
 var _default = CoreClass;
 exports["default"] = _default;

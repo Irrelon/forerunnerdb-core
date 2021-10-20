@@ -13,11 +13,15 @@ var _classCallCheck2 = _interopRequireDefault(require("@babel/runtime/helpers/cl
 
 var _createClass2 = _interopRequireDefault(require("@babel/runtime/helpers/createClass"));
 
+var _assertThisInitialized2 = _interopRequireDefault(require("@babel/runtime/helpers/assertThisInitialized"));
+
 var _inherits2 = _interopRequireDefault(require("@babel/runtime/helpers/inherits"));
 
 var _possibleConstructorReturn2 = _interopRequireDefault(require("@babel/runtime/helpers/possibleConstructorReturn"));
 
 var _getPrototypeOf2 = _interopRequireDefault(require("@babel/runtime/helpers/getPrototypeOf"));
+
+var _defineProperty2 = _interopRequireDefault(require("@babel/runtime/helpers/defineProperty"));
 
 var _CoreClass2 = _interopRequireDefault(require("../core/CoreClass"));
 
@@ -39,6 +43,10 @@ var IndexHashMap = /*#__PURE__*/function (_CoreClass) {
     var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
     (0, _classCallCheck2["default"])(this, IndexHashMap);
     _this = _super.call(this);
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "_keyArr", []);
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "_data", {});
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "_name", "");
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "_options", {});
     _this._options = options;
     _this._name = _this._options.name || Object.entries(keys).reduce(function (name, _ref) {
       var _ref2 = (0, _slicedToArray2["default"])(_ref, 2),

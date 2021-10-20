@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports["default"] = exports.findDeep = exports.find = void 0;
+exports["default"] = exports.findDeep = exports.findOne = exports.find = void 0;
 
 var _match = require("./match");
 
@@ -34,6 +34,22 @@ var find = function find(data, query) {
     });
   });
 };
+
+exports.find = find;
+
+var findOne = function findOne(data, query) {
+  // Break query into operations
+  var pipeline = (0, _build.queryToPipeline)(query); // TODO: Currently only returns the first matching item but we need to take into
+  //  account sorting first if a sort operator is specified (which we need to define
+  //  since we haven't implemented sorting yet anyway)
+  // Loop through each item of data and return the first matching item
+
+  return data.find(function (item) {
+    return (0, _match.matchPipeline)(pipeline, item, {
+      "originalQuery": query
+    });
+  });
+};
 /**
  * Find searches for matching records in an array of data based on
  * the passed query. This function will traverse object hierarchies
@@ -44,7 +60,7 @@ var find = function find(data, query) {
  */
 
 
-exports.find = find;
+exports.findOne = findOne;
 
 var findDeep = function findDeep(data, query) {
   return [];

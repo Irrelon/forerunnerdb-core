@@ -8,7 +8,7 @@ var _assert = _interopRequireDefault(require("assert"));
 
 var _build = require("./build");
 
-var _data = require("../../test/data");
+var _data = require("../../testData/data");
 
 describe("match", function () {
   describe("$eeq", function () {

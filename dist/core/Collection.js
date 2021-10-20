@@ -43,6 +43,8 @@ var _update = _interopRequireDefault(require("./operation/update"));
 
 var _remove = _interopRequireDefault(require("./operation/remove"));
 
+var _pull = require("../utils/pull");
+
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { (0, _defineProperty2["default"])(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
@@ -84,6 +86,7 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
 
     (0, _classCallCheck2["default"])(this, Collection);
     _this = _super.call(this);
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "_receivers", []);
     (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "ensurePrimaryKey", function (doc) {
       if ((0, _path.get)(doc, this._primaryKey) === undefined) {
         // Assign a primary key automatically
@@ -163,20 +166,6 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
       }
 
       return opResult;
-    });
-    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "silentOperation", function (docOrArr, func) {
-      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-      var isArray = Array.isArray(docOrArr);
-      var data = docOrArr;
-
-      if (!isArray) {
-        data = [docOrArr];
-      }
-
-      for (var currentIndex = 0; currentIndex < data.length; currentIndex++) {
-        var doc = data[currentIndex];
-        func(doc, options);
-      }
     });
     (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "pushData", function (doc) {
       _this._indexInsert(doc);
@@ -416,12 +405,19 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
                 return _this.removeById((0, _path.get)(_this._data[0], _this._primaryKey));
 
               case 24:
+                _this.emit("insert", {
+                  insertResult: insertResult,
+                  insertOperationResult: insertOperationResult,
+                  data: data
+                }); // 5 Return result
+
+
                 return _context4.abrupt("return", _objectSpread(_objectSpread(_objectSpread({}, insertResult), insertOperationResult), {}, {
                   nInserted: insertOperationResult.inserted.length,
                   nFailed: insertOperationResult.notInserted.length
                 }));
 
-              case 25:
+              case 26:
               case "end":
                 return _context4.stop();
             }
@@ -506,9 +502,17 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
       var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
       // TODO: Add option to run a sanity check on each match before and update
       //  is performed so we can check if an index violation would occur
-      var resultArr = (0, _update["default"])(_this._data, queryObj, updateObj, options); // TODO: Now loop the result array and check if any fields that are in the
+      var resultArr = (0, _update["default"])(_this._data, queryObj, updateObj, options);
+
+      _this.emit("update", {
+        resultArr: resultArr,
+        queryObj: queryObj,
+        updateObj: updateObj,
+        options: options
+      }); // TODO: Now loop the result array and check if any fields that are in the
       //  update object match fields that are in the index. If they are, remove each
       //  document from the index and re-index them
+
 
       return resultArr;
     });
@@ -525,9 +529,16 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
     (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "remove", function () {
       var queryObj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
       var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-      var resultArr = (0, _remove["default"])(_this._data, queryObj, options); // TODO: Now loop the result array and check if any fields that are in the
+      var resultArr = (0, _remove["default"])(_this._data, queryObj, options);
+
+      _this.emit("remove", {
+        resultArr: resultArr,
+        queryObj: queryObj,
+        options: options
+      }); // TODO: Now loop the result array and check if any fields that are in the
       //  remove array match objects that are in the index. If they are, remove each
       //  document from the index
+
 
       return resultArr;
     });
@@ -544,6 +555,49 @@ var Collection = /*#__PURE__*/function (_CoreClass) {
     (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "removeById", function (id) {
       return _this.removeOne((0, _defineProperty2["default"])({}, _this._primaryKey, id));
     });
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "pipe", function (receiver) {
+      _this._receivers.push(receiver);
+
+      _this.on("insert", function (args) {});
+    });
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "unPipe", function (receiver) {
+      (0, _pull.pull)(_this._receivers, receiver);
+    });
+    (0, _defineProperty2["default"])((0, _assertThisInitialized2["default"])(_this), "virtual", /*#__PURE__*/function () {
+      var _ref7 = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee7(path) {
+        var newCollection, initialData;
+        return _regenerator["default"].wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                newCollection = new Collection(); // Set initial data
+                // TODO: Make path selection with .$. work
+
+                _context7.next = 3;
+                return _this.find(path);
+
+              case 3:
+                initialData = _context7.sent;
+                _context7.next = 6;
+                return newCollection.insert(initialData);
+
+              case 6:
+                _this.pipe(newCollection);
+
+                return _context7.abrupt("return", newCollection);
+
+              case 8:
+              case "end":
+                return _context7.stop();
+            }
+          }
+        }, _callee7);
+      }));
+
+      return function (_x7) {
+        return _ref7.apply(this, arguments);
+      };
+    }());
     _this._name = name;
     _this._cap = 0;
     _this._primaryKey = "_id";

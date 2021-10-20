@@ -6,7 +6,7 @@ var _find = _interopRequireDefault(require("./find"));
 
 var _assert = _interopRequireDefault(require("assert"));
 
-var _data = require("../../test/data");
+var _data = require("../../testData/data");
 
 describe("find()", function () {
   describe("Number", function () {
@@ -224,5 +224,27 @@ describe("find()", function () {
     _assert["default"].strictEqual(result[0].phone, "", "Details correct");
 
     _assert["default"].strictEqual(result[0].fax, "", "Details correct");
+  });
+  describe("Array Wildcards", function () {
+    it("Handles array wildcards", function () {
+      var data = [{
+        "arr": [{
+          "arr": [{
+            "item": 1
+          }]
+        }, {
+          "arr": [{
+            "item": 2
+          }]
+        }]
+      }];
+      var result = (0, _find["default"])(data, "arr.$.arr.$");
+
+      _assert["default"].deepStrictEqual(result, [{
+        "item": 1
+      }, {
+        "item": 2
+      }]);
+    });
   });
 });
