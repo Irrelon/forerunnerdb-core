@@ -1008,9 +1008,9 @@
     irrelon-overload "^1.0.3"
 
 "@irrelon/path@^4.6.4":
-  version "4.6.4"
-  resolved "https://registry.yarnpkg.com/@irrelon/path/-/path-4.6.4.tgz#248ac43b304f558852933fa85295e41db8308a82"
-  integrity sha512-kj9WklanbQOVsXAQZprjauwDpGVhQTXvzUDa4yzZvUjLDL2ddPRJD5JOJQOxiLFvYxqyhgsIV9XW9MiNQmff+w==
+  version "4.7.0"
+  resolved "https://registry.yarnpkg.com/@irrelon/path/-/path-4.7.0.tgz#d0f0be720157a4efca0cf1a6e3c58ad1f434e869"
+  integrity sha512-xgL6yFpL+FM5SkRIe1ZHDpsbV4wjessLty0Od4hsYsgHo1IKeSxI7aHZhyzftPFZYUR22wQRSgg3q2OsgHg/SQ==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
