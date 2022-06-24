@@ -80,7 +80,7 @@
 		"enzyme-adapter-react-16": "^1.12.1",
 		"eslint-config-irrelon": "^1.0.10",
 		"express": "^4.16.4",
-		"jsdom": "^15.0.0",
+		"jsdom": "^16.5.0",
 		"mocha": "^6.1.4",
 		"mocha-parallel-tests": "^2.1.0",
 		"nodemon": "^2.0.3",
