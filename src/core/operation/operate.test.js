@@ -1,4 +1,4 @@
-import {$inc, $pop, $push, $shift, $unset} from "./operate";
+import {$inc, $pop, $push, $set, $shift, $unset} from "./operate";
 import assert from "assert";
 
 describe("operate", () => {
@@ -66,6 +66,16 @@ describe("operate", () => {
 
 			assert.deepStrictEqual(arr, [], "Correct");
 			assert.deepStrictEqual(result, [], "Correct");
+		});
+	});
+
+	describe("$set", () => {
+		it("Set an object key", () => {
+			const obj = {"foo": true, "bar": false};
+			const result = $set(obj, "foo", false);
+
+			assert.deepStrictEqual(obj, {"foo": true, "bar": false}, "Correct");
+			assert.deepStrictEqual(result, {"foo": false, "bar": false}, "Correct");
 		});
 	});
 

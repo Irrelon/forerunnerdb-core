@@ -23,6 +23,10 @@ export const $updateReplaceMode = (dataItem, opArr, extraInfo = {"originalQuery"
 		const opValue = opData.value;
 		const opFunc = operationLookup[opData.op];
 
+		if (!opFunc) {
+			throw new Error(`Unknown operation "${opData.op}"`);
+		}
+
 		if (!opFunc.selfControlled) {
 			const currentValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
 			const newData = opFunc(currentValue, opValue, {"originalQuery": extraInfo.originalQuery, "operation": opData});
@@ -89,10 +93,15 @@ export const $shift = (data, value, extraInfo = {}) => {
 	return newArr;
 };
 
+export const $set = (newDataItem, opPath, opValue, extraInfo = {}) => {
+	return pathSetImmutable(newDataItem, opPath, opValue);
+};
+
 export const $unset = (newDataItem, opPath, opValue, extraInfo = {}) => {
 	return pathUnSetImmutable(newDataItem, opPath);
 };
 
+$set.selfControlled = true;
 $unset.selfControlled = true;
 
 export const operationLookup = {
@@ -104,6 +113,7 @@ export const operationLookup = {
 	$pullAll,
 	$pop,
 	$shift,
+	$set,
 	$unset
 };
 
