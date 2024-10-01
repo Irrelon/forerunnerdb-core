@@ -1,7 +1,7 @@
-import emitter from "@irrelon/emitter";
+import {Emitter} from "@irrelon/emitter";
 const _synth = {};
 
-class CoreClass {
+class CoreClass extends Emitter {
 	/**
 	 * Generates a generic getter/setter method for the passed method name.
 	 * @param {String} name The name of the getter/setter to generate.
@@ -19,7 +19,5 @@ class CoreClass {
 		return _synth[name];
 	}
 }
-
-emitter(CoreClass);
 
 export default CoreClass;
