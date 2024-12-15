@@ -52,3 +52,27 @@ buck-out/
 */fastlane/screenshots
 
 .next
+/coverage/lcov-report/core/operation/build.js.html
+/coverage/lcov-report/core/operation/find.js.html
+/coverage/lcov-report/core/operation/index.html
+/coverage/lcov-report/core/operation/insert.js.html
+/coverage/lcov-report/core/operation/match.js.html
+/coverage/lcov-report/core/operation/operate.js.html
+/coverage/lcov-report/core/operation/remove.js.html
+/coverage/lcov-report/core/operation/testFlight.js.html
+/coverage/lcov-report/core/operation/update.js.html
+/coverage/lcov-report/testData/data.js.html
+/coverage/lcov-report/testData/index.html
+/coverage/lcov-report/utils/index.html
+/coverage/lcov-report/utils/type.js.html
+/coverage/lcov-report/base.css
+/coverage/lcov-report/block-navigation.js
+/coverage/lcov-report/favicon.png
+/coverage/lcov-report/index.html
+/coverage/lcov-report/prettify.css
+/coverage/lcov-report/prettify.js
+/coverage/lcov-report/sort-arrow-sprite.png
+/coverage/lcov-report/sorter.js
+/coverage/clover.xml
+/coverage/coverage-final.json
+/coverage/lcov.info

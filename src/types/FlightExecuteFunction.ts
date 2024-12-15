@@ -1,0 +1,1 @@
+export type FlightExecuteFunction = (...args: any[]) => any;

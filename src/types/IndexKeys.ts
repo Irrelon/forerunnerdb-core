@@ -1,0 +1,1 @@
+export type IndexKeys = Record<string, number>;
