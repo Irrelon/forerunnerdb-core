@@ -60,8 +60,8 @@ export const update = async (dataArr, query, update = {}, options = {}) => {
 		// Build an update object for this document
 		const updatePipeline = updateToPipeline(update);
 		const updatedDoc = operatePipeline(updatePipeline, originalDoc, {"originalUpdate": update});
-		
-		return pathUpdate(originalDoc, updatedDoc, {
+
+		return pathUpdate(originalDoc, "", updatedDoc, {
 			"immutable": true
 		});
 	};

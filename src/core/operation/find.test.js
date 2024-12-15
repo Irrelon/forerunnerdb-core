@@ -70,10 +70,8 @@ describe("find()", () => {
 
 		it("Matches based on sub-documents", () => {
 			const query = {
-				"arr": {
-					"goof": true,
-					"fun": false
-				}
+				"arr.goof": true,
+				"arr.fun": false
 			};
 
 			const result = find(data, query);
@@ -85,15 +83,11 @@ describe("find()", () => {
 		it("Matches based on gated sub-documents", () => {
 			const query = {
 				"$or": [{
-					"arr": {
-						"goof": true,
-						"fun": false
-					}
+					"arr.goof": true,
+					"arr.fun": false
 				}, {
-					"arr": {
-						"goof": true,
-						"fun": true
-					}
+					"arr.goof": true,
+					"arr.fun": true
 				}]
 			};
 

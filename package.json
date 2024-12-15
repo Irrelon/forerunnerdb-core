@@ -40,6 +40,7 @@
 		"build": "babel src --out-dir dist",
 		"eslint": "eslint ./src",
 		"eslint-fix": "eslint --fix ./src",
+		"jest": "jest",
 		"test": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/*.test.js src/**/*.test.js src/**/**/*.test.js",
 		"test-insert": "NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/core/operation/insert.test.js",
 		"testMon-insert": "nodemon --watch src --exec \"NODE_ENV=test BABEL_DISABLE_CACHE=1 mocha --require @babel/register --require @babel/core --require @babel/polyfill src/core/operation/insert.test.js\"",
@@ -51,16 +52,18 @@
 		"url": "git://github.com/irrelon/fdb-core.git"
 	},
 	"main": "./dist/main.js",
+	"type": "module",
 	"bugs": {
-		"url": "http://github.com/irrelon/fdb-core/issues"
+		"url": "https://github.com/irrelon/fdb-core/issues"
 	},
 	"license": "MIT",
 	"dependencies": {
 		"@babel/runtime": "^7.9.2",
-		"@irrelon/emitter": "^3.0.0",
-		"@irrelon/path": "^4.6.4",
+		"@irrelon/emitter": "^6.1.0",
+		"@irrelon/path": "^6.4.5",
 		"eslint": "^7.2.0",
-		"irrelon-log": "^2.0.3"
+		"irrelon-log": "^2.0.3",
+		"jest": "^29.7.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.4.4",
@@ -81,8 +84,6 @@
 		"eslint-config-irrelon": "^1.0.10",
 		"express": "^4.16.4",
 		"jsdom": "^15.0.0",
-		"mocha": "^6.1.4",
-		"mocha-parallel-tests": "^2.1.0",
 		"nodemon": "^2.0.3",
 		"react": "^16.8.6",
 		"react-dom": "^16.8.6",

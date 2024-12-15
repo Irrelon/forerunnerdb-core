@@ -25,7 +25,7 @@ export const $and = (dataItem, opArr, extraInfo = {"originalQuery": {}}) => {
 			return operationLookup[opData.op](dataItem, opData.value, extraInfo);
 		}
 
-		dataValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true});
+		dataValue = pathGet(dataItem, opData.path, undefined, {"arrayTraversal": true, "arrayExpansion": true});
 		opFunc = operationLookup[opData.op];
 		opValue = opData.value;
 
@@ -100,6 +100,7 @@ export const $exists = (data, query, extraInfo = {}) => {
 };
 
 export const $eq = (data, query, extraInfo = {}) => { // Equals
+	// eslint-disable-next-line eqeqeq
 	return normalise(data) == normalise(query); // jshint ignore:line
 };
 
@@ -108,6 +109,7 @@ export const $eeq = (data, query, extraInfo = {}) => { // Equals equals
 };
 
 export const $ne = (data, query, extraInfo = {}) => { // Not equals
+	// eslint-disable-next-line eqeqeq
 	return normalise(data) != normalise(query); // eslint ignore:line
 };
 // Not equals equals
@@ -221,7 +223,7 @@ export const $count = (data, query) => {
 
 	// Iterate the count object's keys
 	for (countKey in query) {
-		if (query.hasOwnProperty(countKey)) {
+		if (Object.hasOwnProperty.call(query, countKey)) {
 			// Check the property exists and is an array. If the property being counted is not
 			// an array (or doesn't exist) then use a value of zero in any further count logic
 			countArr = data[countKey];
@@ -256,5 +258,6 @@ export const operationLookup = {
 	$in,
 	$nin,
 	$fastIn,
-	$fastNin
+	$fastNin,
+	$exists
 };

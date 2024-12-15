@@ -332,12 +332,12 @@ describe("Collection", () => {
 				}];
 
 				const coll = new Collection("deepQueryTestCollection");
-				coll.insertMany(collectionData);
+				await coll.insertMany(collectionData);
 
 				const virtualCollection = await coll.virtual("nodes.$.connections.$");
 
-				const findResult1 = await coll.find();
-				const findResult2 = await virtualCollection.find();
+				const findResult1 = coll.find();
+				const findResult2 = virtualCollection.find();
 
 				assert.strictEqual(findResult1.length, 1, "Number of documents is correct");
 				assert.strictEqual(findResult2.length, 2, "Number of documents is correct");
